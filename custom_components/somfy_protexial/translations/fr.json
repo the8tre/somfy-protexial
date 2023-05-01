@@ -1,0 +1,24 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Saisissez l'URL de l'interface web locale de votre centrale",
+                "data": {
+                    "url": "URL"
+                }
+            },
+            "login": {
+                "description": "Saisisez le code pour le challenge {challenge}",
+                "data": {
+                    "username": "Nom d'utilisateur",
+                    "password": "Mot de passe",
+                    "code": "Code"
+                }
+            }
+        },
+        "error": {
+            "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
+            "connection": "Impossible de joindre le serveur."
+        }
+    }
+}

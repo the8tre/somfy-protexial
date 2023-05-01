@@ -1,0 +1,11 @@
+{
+  "_output_dir": "/Users/ludo/Documents/dev",
+  "_template": "git@github.com:oncleben31/cookiecutter-homeassistant-custom-component.git",
+  "class_name_prefix": "SomfyProtexial",
+  "domain_name": "somfy_protexial",
+  "friendly_name": "Somfy Protexial",
+  "github_user": "the8tre",
+  "project_name": "somfy-protexial",
+  "test_suite": "no",
+  "version": "1.0.0"
+}

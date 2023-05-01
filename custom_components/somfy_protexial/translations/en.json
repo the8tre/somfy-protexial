@@ -1,0 +1,25 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Provide your Protexial central local web interface URL",
+                "data": {
+                    "url": "URL",
+                    "single_instance_allowed": "Single instane allowed"
+                }
+            },
+            "login": {
+                "description": "Provide code for challenge {challenge}",
+                "data": {
+                    "username": "Username",
+                    "password": "Password",
+                    "code": "Code"
+                }
+            }
+        },
+        "error": {
+            "auth": "Wrong Username/Password/Code.",
+            "connection": "Unable to connect to the server."
+        }
+    }
+}
