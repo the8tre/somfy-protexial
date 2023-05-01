@@ -3,7 +3,8 @@ from enum import Enum
 import logging
 from xml.etree import ElementTree as ET
 
-import aiohttp
+from aiohttp import ClientError, ClientSession
+import async_timeout
 from pyquery import PyQuery as pq
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ TIMEOUT = 10
 
 
 class SomfyProtexial:
-    def __init__(self, session, url, username=None, password=None, codes=None):
+    def __init__(self, session: ClientSession, url, username=None, password=None, codes=None):
         self.url = url
         self.username = username
         self.password = password
@@ -77,7 +78,7 @@ class SomfyProtexial:
             if data:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-            async with asyncio.timeout(TIMEOUT):
+            async with async_timeout.timeout(TIMEOUT):
                 if method == "get":
                     response = await self.session.get(
                         self.url + path, headers=headers
@@ -143,7 +144,7 @@ class SomfyProtexial:
                 f"Timeout error fetching information from {path} - {exception}"
             )
 
-        except aiohttp.ClientError as exception:
+        except ClientError as exception:
             _LOGGER.error(
                 "Error fetching information from %s - %s",
                 path,
