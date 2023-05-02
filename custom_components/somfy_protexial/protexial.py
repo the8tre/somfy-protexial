@@ -1,6 +1,6 @@
 import asyncio
-import logging
 from enum import Enum
+import logging
 from xml.etree import ElementTree as ET
 
 from aiohttp import ClientError, ClientSession
