@@ -1,5 +1,5 @@
-from functools import reduce
 import logging
+from functools import reduce
 
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
 from homeassistant.config_entries import ConfigEntry

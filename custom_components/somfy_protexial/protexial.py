@@ -1,6 +1,6 @@
 import asyncio
-from enum import Enum
 import logging
+from enum import Enum
 from xml.etree import ElementTree as ET
 
 from aiohttp import ClientError, ClientSession
@@ -89,7 +89,7 @@ class SomfyProtexial:
                     )
 
             if response.status == 200:
-                if response.real_url.path == Page.DEFAULT and retry == True:
+                if response.real_url.path == Page.DEFAULT and retry is True:
                     await self.__login()
                     return await self.__do_call(
                         method, path, headers, data, retry=False, login=False
@@ -100,7 +100,7 @@ class SomfyProtexial:
                     if not error_element:
                         raise Exception("Unknown error")
                     errorCode = error_element.text()
-                    if errorCode == Error.NOT_AUTHORIZED and not self.cookie and retry == True:
+                    if errorCode == Error.NOT_AUTHORIZED and not self.cookie and retry is True:
                         await self.__login()
                         return await self.__do_call(
                             method, path, headers, data, retry=False, login=False
@@ -173,7 +173,7 @@ class SomfyProtexial:
 
     async def __login(self, username=None, password=None, code=None):
         self.cookie = None
-        if code == None:
+        if code is None:
             challenge = await self.get_challenge()
             code = self.codes[challenge]
 
