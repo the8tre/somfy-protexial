@@ -5,7 +5,7 @@ from datetime import timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, Platform
+from homeassistant.const import CONF_PASSWORD, CONF_SCAN_INTERVAL, CONF_URL, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.typing import ConfigType
@@ -23,6 +23,7 @@ PLATFORMS = [
     Platform.COVER,
     Platform.LIGHT,
 ]
+
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
@@ -55,13 +56,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER,
         name="Somfy Protexial status update",
         update_method=_get_status,
-        update_interval=SCAN_INTERVAL
+        update_interval=timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL)),
     )
 
-    hass.data[DOMAIN][entry.entry_id] = {
-        API: protexial,
-        COORDINATOR: coordinator
-    }
+    hass.data[DOMAIN][entry.entry_id] = {API: protexial, COORDINATOR: coordinator}
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -70,13 +68,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     return True
 
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = hass.data[DOMAIN][entry.entry_id][API]
     await api.logout()
 
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        entry, PLATFORMS
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

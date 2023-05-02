@@ -35,7 +35,11 @@ class ProtexialLight(LightEntity):
         return DEFAULT_LIGHT_NAME
         
     @property
-    def is_on(self) -> bool | None:
+    def icon(self):
+        return "mdi:lightbulb-group"
+    
+    @property
+    def is_on(self):
         return self._state
     
     async def async_turn_on(self):

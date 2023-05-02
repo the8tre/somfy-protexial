@@ -30,7 +30,7 @@ class Page(str, Enum):
     PILOTAGE = "/fr/u_pilotage.htm"
     STATUS = "/status.xml"
     ERROR = "/fr/error.htm"
-    ELEMENTS = "/fr/u_listelmt.htm"
+    ELEMENTS = "/fr/u_plistelmt.htm"
     PRINT = "/fr/u_print.htm"
     VERSION = "/cfg/vers"
     DEFAULT = "/default.htm"

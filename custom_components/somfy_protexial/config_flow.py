@@ -4,15 +4,27 @@ from urllib.parse import urlparse
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
+from homeassistant.const import (
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_URL,
+    CONF_USERNAME,
+    STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_ARMED_NIGHT,
+)
 from homeassistant.helpers import aiohttp_client, config_validation as cv
 from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
 )
+from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 
-from .const import CONF_CODE, CONF_CODES, DOMAIN
+from .const import CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,11 +36,11 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
-        
+
         errors = {}
         if user_input is not None:
             parts = urlparse(user_input[CONF_URL])
-            self.url = f'{parts.scheme}://{parts.netloc}'
+            self.url = f"{parts.scheme}://{parts.netloc}"
             session = aiohttp_client.async_create_clientsession(self.hass)
             self.protexial = SomfyProtexial(session, self.url)
             try:
@@ -36,14 +48,14 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_login(None, challenge)
             except Exception as e:
                 _LOGGER.error(e)
-                errors['base'] = 'connection'
+                errors["base"] = "connection"
 
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {vol.Required(CONF_URL, default="http://192.168.1.147"): cv.string}
             ),
-            errors=errors
+            errors=errors,
         )
 
     async def async_step_login(self, user_input, challenge=None):
@@ -57,20 +69,15 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.codes = await self.protexial.get_challenge_card(
                     self.username, self.password, self.code
                 )
-                
-                return self.async_create_entry(title=self.url, data={
-                    CONF_URL: self.url,
-                    CONF_USERNAME: self.username,
-                    CONF_PASSWORD: self.password,
-                    CONF_CODES: self.codes,
-                })
+
+                return await self.async_step_config(None)
             except Exception as e:
                 _LOGGER.error(e)
-                errors['base'] = 'auth'
+                errors["base"] = "auth"
 
         if challenge is None:
             challenge = await self.protexial.get_challenge()
-            
+
         return self.async_show_form(
             step_id="login",
             description_placeholders={"challenge": challenge},
@@ -80,8 +87,45 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_PASSWORD): cv.string,
                     vol.Required(CONF_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
-                    )
+                    ),
                 }
             ),
-            errors = errors
+            errors=errors,
+        )
+
+    async def async_step_config(self, user_input):
+        if user_input is not None:
+            modes = []
+            # if user_input[STATE_ALARM_ARMED_AWAY]:
+            modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
+            if user_input[STATE_ALARM_ARMED_NIGHT]:
+                modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
+            if user_input[STATE_ALARM_ARMED_HOME]:
+                modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
+            return self.async_create_entry(
+                title=self.url,
+                data={
+                    CONF_URL: self.url,
+                    CONF_USERNAME: self.username,
+                    CONF_PASSWORD: self.password,
+                    CONF_CODES: self.codes,
+                    CONF_MODES: modes,
+                    CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
+                },
+            )
+
+        return self.async_show_form(
+            step_id="config",
+            data_schema=vol.Schema(
+                {
+                    # vol.Required(STATE_ALARM_ARMED_AWAY, default=True): cv.boolean,
+                    vol.Optional(STATE_ALARM_ARMED_NIGHT, default=False): cv.boolean,
+                    vol.Optional(STATE_ALARM_ARMED_HOME, default=False): cv.boolean,
+                    vol.Required(CONF_SCAN_INTERVAL, default=20): NumberSelector(
+                        NumberSelectorConfig(
+                            mode=NumberSelectorMode.BOX, min=15, max=3600, step=1
+                        )
+                    ),
+                }
+            ),
         )

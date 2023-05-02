@@ -37,6 +37,10 @@ class ProtexialCover(CoverEntity):
         return DEFAULT_COVER_NAME
     
     @property
+    def icon(self):
+        return "mdi:roller-shade"
+    
+    @property
     def is_closed(self):
         # Can't determine cover state
         return None

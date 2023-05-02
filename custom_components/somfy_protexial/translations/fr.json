@@ -14,6 +14,15 @@
                     "password": "Mot de passe",
                     "code": "Code"
                 }
+            },
+            "config": {
+                "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
+                "data": {
+                    "armed_away": "Armer en absence (Zones A+B+C)",
+                    "armed_night": "Armer pour la nuit (Zones A+B)",
+                    "armed_home": "Armer en présence (Zone A seulement)",
+                    "scan_interval": "Interval de rafraîchissement (seconds)"
+                }
             }
         },
         "error": {
