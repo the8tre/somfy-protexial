@@ -3,17 +3,19 @@ from functools import reduce
 
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_DISARMED,
-)
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import STATE_ALARM_ARMED_AWAY
+from homeassistant.const import STATE_ALARM_ARMED_HOME
+from homeassistant.const import STATE_ALARM_ARMED_NIGHT
+from homeassistant.const import STATE_ALARM_DISARMED
+from homeassistant.core import callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import API, CONF_MODES, COORDINATOR, DOMAIN
+from .const import API
+from .const import CONF_MODES
+from .const import COORDINATOR
+from .const import DOMAIN
 from .protexial import Zone
 
 DEFAULT_ALARM_NAME = "Somfy Protexial"

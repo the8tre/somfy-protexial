@@ -1,33 +1,33 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Saisissez l'URL de l'interface web locale de votre centrale",
-                "data": {
-                    "url": "URL"
-                }
-            },
-            "login": {
-                "description": "Saisisez le code pour le challenge {challenge}",
-                "data": {
-                    "username": "Nom d'utilisateur",
-                    "password": "Mot de passe",
-                    "code": "Code"
-                }
-            },
-            "config": {
-                "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
-                "data": {
-                    "armed_away": "Armer en absence (Zones A+B+C)",
-                    "armed_night": "Armer pour la nuit (Zones A+B)",
-                    "armed_home": "Armer en présence (Zone A seulement)",
-                    "scan_interval": "Interval de rafraîchissement (seconds)"
-                }
-            }
-        },
-        "error": {
-            "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
-            "connection": "Impossible de joindre le serveur."
+  "config": {
+    "step": {
+      "user": {
+        "description": "Saisissez l'URL de l'interface web locale de votre centrale",
+        "data": {
+          "url": "URL"
         }
+      },
+      "login": {
+        "description": "Saisisez le code pour le challenge {challenge}",
+        "data": {
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "code": "Code"
+        }
+      },
+      "config": {
+        "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
+        "data": {
+          "armed_away": "Armer en absence (Zones A+B+C)",
+          "armed_night": "Armer pour la nuit (Zones A+B)",
+          "armed_home": "Armer en présence (Zone A seulement)",
+          "scan_interval": "Interval de rafraîchissement (seconds)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
+      "connection": "Impossible de joindre le serveur."
     }
+  }
 }

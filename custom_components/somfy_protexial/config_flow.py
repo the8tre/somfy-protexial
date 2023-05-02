@@ -2,28 +2,27 @@ import logging
 from urllib.parse import urlparse
 
 import voluptuous as vol
-
 from homeassistant import config_entries
-from homeassistant.const import (
-    CONF_PASSWORD,
-    CONF_SCAN_INTERVAL,
-    CONF_URL,
-    CONF_USERNAME,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-)
-from homeassistant.helpers import aiohttp_client, config_validation as cv
-from homeassistant.helpers.selector import (
-    NumberSelector,
-    NumberSelectorConfig,
-    NumberSelectorMode,
-    TextSelector,
-    TextSelectorConfig,
-    TextSelectorType,
-)
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
+from homeassistant.const import CONF_PASSWORD
+from homeassistant.const import CONF_SCAN_INTERVAL
+from homeassistant.const import CONF_URL
+from homeassistant.const import CONF_USERNAME
+from homeassistant.const import STATE_ALARM_ARMED_HOME
+from homeassistant.const import STATE_ALARM_ARMED_NIGHT
+from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.selector import NumberSelector
+from homeassistant.helpers.selector import NumberSelectorConfig
+from homeassistant.helpers.selector import NumberSelectorMode
+from homeassistant.helpers.selector import TextSelector
+from homeassistant.helpers.selector import TextSelectorConfig
+from homeassistant.helpers.selector import TextSelectorType
 
-from .const import CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
+from .const import CONF_CODE
+from .const import CONF_CODES
+from .const import CONF_MODES
+from .const import DOMAIN
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)

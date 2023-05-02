@@ -1,34 +1,34 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Provide your Protexial central local web interface URL",
-                "data": {
-                    "url": "URL",
-                    "single_instance_allowed": "Single instane allowed"
-                }
-            },
-            "login": {
-                "description": "Provide code for challenge {challenge}",
-                "data": {
-                    "username": "Username",
-                    "password": "Password",
-                    "code": "Code"
-                }
-            },
-            "config": {
-                "description": "Choose other arm modes in addition to 'Arm away (Zones A+B+C)'",
-                "data": {
-                    "armed_away": "Arm away (Zones A+B+C)",
-                    "armed_night": "Arm night (Zones A+B)",
-                    "armed_home": "Arm home (Zone A only)",
-                    "scan_interval": "Scan interval (seconds)"
-                }
-            }
-        },
-        "error": {
-            "auth": "Wrong Username/Password/Code.",
-            "connection": "Unable to connect to the server."
+  "config": {
+    "step": {
+      "user": {
+        "description": "Provide your Protexial central local web interface URL",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "Single instane allowed"
         }
+      },
+      "login": {
+        "description": "Provide code for challenge {challenge}",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "code": "Code"
+        }
+      },
+      "config": {
+        "description": "Choose other arm modes in addition to 'Arm away (Zones A+B+C)'",
+        "data": {
+          "armed_away": "Arm away (Zones A+B+C)",
+          "armed_night": "Arm night (Zones A+B)",
+          "armed_home": "Arm home (Zone A only)",
+          "scan_interval": "Scan interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Wrong Username/Password/Code.",
+      "connection": "Unable to connect to the server."
     }
+  }
 }
