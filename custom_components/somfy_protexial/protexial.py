@@ -61,7 +61,9 @@ TIMEOUT = 10
 
 
 class SomfyProtexial:
-    def __init__(self, session: ClientSession, url, username=None, password=None, codes=None):
+    def __init__(
+        self, session: ClientSession, url, username=None, password=None, codes=None
+    ):
         self.url = url
         self.username = username
         self.password = password
@@ -80,9 +82,7 @@ class SomfyProtexial:
 
             async with async_timeout.timeout(TIMEOUT):
                 if method == "get":
-                    response = await self.session.get(
-                        self.url + path, headers=headers
-                    )
+                    response = await self.session.get(self.url + path, headers=headers)
                 elif method == "post":
                     response = await self.session.post(
                         self.url + path, data=data, headers=headers
@@ -100,7 +100,11 @@ class SomfyProtexial:
                     if not error_element:
                         raise Exception("Unknown error")
                     errorCode = error_element.text()
-                    if errorCode == Error.NOT_AUTHORIZED and not self.cookie and retry is True:
+                    if (
+                        errorCode == Error.NOT_AUTHORIZED
+                        and not self.cookie
+                        and retry is True
+                    ):
                         await self.__login()
                         return await self.__do_call(
                             method, path, headers, data, retry=False, login=False
