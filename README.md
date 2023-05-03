@@ -7,7 +7,7 @@
 [![pre-commit][pre-commit-shield]][pre-commit]
 [![Black][black-shield]][black]
 
-[![hacs][hacsbadge]][hacs]
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
