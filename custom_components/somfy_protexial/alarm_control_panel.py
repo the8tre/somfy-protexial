@@ -2,6 +2,7 @@ import logging
 from functools import reduce
 
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
+from homeassistant.components.alarm_control_panel import CodeFormat
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ALARM_ARMED_AWAY
 from homeassistant.const import STATE_ALARM_ARMED_HOME
@@ -9,10 +10,12 @@ from homeassistant.const import STATE_ALARM_ARMED_NIGHT
 from homeassistant.const import STATE_ALARM_DISARMED
 from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import API
+from .const import CONF_ARM_CODE
 from .const import CONF_MODES
 from .const import COORDINATOR
 from .const import DOMAIN
@@ -33,17 +36,19 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
     api = hass.data[DOMAIN][config_entry.entry_id][API]
     modes = config_entry.data.get(CONF_MODES)
+    arm_code = config_entry.data.get(CONF_ARM_CODE)
     alarms = []
-    alarms.append(ProtexialAlarm(coordinator, api, modes))
+    alarms.append(ProtexialAlarm(coordinator, api, modes, arm_code))
     async_add_entities(alarms)
 
 
 class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
-    def __init__(self, coordinator, api, modes):
+    def __init__(self, coordinator, api, modes, arm_code):
         super().__init__(coordinator)
         self.coordinator = coordinator
         self.api = api
         self.modes = modes
+        self.arm_code = arm_code
         self._changed_by = None
         self._attr_state = self.__getCurrentState()
 
@@ -64,7 +69,10 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def code_format(self):
         """Return one or more digits/characters."""
-        return None
+        if self.arm_code is None:
+            return None
+        else:
+            return CodeFormat.NUMBER
 
     @property
     def changed_by(self):
@@ -93,18 +101,26 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             return STATE_ALARM_DISARMED
 
     async def async_alarm_disarm(self, code=None):
+        self.check_arm_code(code)
         await self.api.disarm()
         await self.coordinator.async_request_refresh()
 
     async def async_alarm_arm_home(self, code=None):
+        self.check_arm_code(code)
         await self.api.arm(Zone.A)
         await self.coordinator.async_request_refresh()
 
     async def async_alarm_arm_night(self, code=None):
+        self.check_arm_code(code)
         await self.api.arm(Zone.A)
         await self.api.arm(Zone.B)
         await self.coordinator.async_request_refresh()
 
     async def async_alarm_arm_away(self, code=None):
+        self.check_arm_code(code)
         await self.api.arm(Zone.ABC)
         await self.coordinator.async_request_refresh()
+
+    def check_arm_code(self, code):
+        if not self.arm_code == code:
+            raise HomeAssistantError('Invalid code')

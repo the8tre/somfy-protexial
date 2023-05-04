@@ -1,4 +1,6 @@
 import logging
+import re
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 import voluptuous as vol
@@ -19,6 +21,7 @@ from homeassistant.helpers.selector import TextSelector
 from homeassistant.helpers.selector import TextSelectorConfig
 from homeassistant.helpers.selector import TextSelectorType
 
+from .const import CONF_ARM_CODE
 from .const import CONF_CODE
 from .const import CONF_CODES
 from .const import CONF_MODES
@@ -51,7 +54,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
-                {vol.Required(CONF_URL, default="http://192.168.1.147"): cv.string}
+                {vol.Required(CONF_URL): cv.string}
             ),
             errors=errors,
         )
@@ -91,34 +94,45 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+
     async def async_step_config(self, user_input):
+        errors = {}
         if user_input is not None:
-            modes = []
-            # if user_input[STATE_ALARM_ARMED_AWAY]:
-            modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
-            if user_input[STATE_ALARM_ARMED_NIGHT]:
-                modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
-            if user_input[STATE_ALARM_ARMED_HOME]:
-                modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
-            return self.async_create_entry(
-                title=self.url,
-                data={
-                    CONF_URL: self.url,
-                    CONF_USERNAME: self.username,
-                    CONF_PASSWORD: self.password,
-                    CONF_CODES: self.codes,
-                    CONF_MODES: modes,
-                    CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
-                },
-            )
+            arm_code = user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
+            if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
+                modes = []
+                # if user_input[STATE_ALARM_ARMED_AWAY]:
+                modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
+                if user_input[STATE_ALARM_ARMED_NIGHT]:
+                    modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
+                if user_input[STATE_ALARM_ARMED_HOME]:
+                    modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
+                return self.async_create_entry(
+                    title=self.url,
+                    data={
+                        CONF_URL: self.url,
+                        CONF_USERNAME: self.username,
+                        CONF_PASSWORD: self.password,
+                        CONF_CODES: self.codes,
+                        CONF_MODES: modes,
+                        CONF_ARM_CODE: arm_code,
+                        CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
+                    },
+                )
+            else:
+                errors["base"] = "arm_code"
 
         return self.async_show_form(
             step_id="config",
+            errors=errors,
             data_schema=vol.Schema(
                 {
                     # vol.Required(STATE_ALARM_ARMED_AWAY, default=True): cv.boolean,
                     vol.Optional(STATE_ALARM_ARMED_NIGHT, default=False): cv.boolean,
                     vol.Optional(STATE_ALARM_ARMED_HOME, default=False): cv.boolean,
+                    vol.Optional(CONF_ARM_CODE): TextSelector(
+                        TextSelectorConfig(type=TextSelectorType.PASSWORD)
+                    ),
                     vol.Required(CONF_SCAN_INTERVAL, default=20): NumberSelector(
                         NumberSelectorConfig(
                             mode=NumberSelectorMode.BOX, min=15, max=3600, step=1

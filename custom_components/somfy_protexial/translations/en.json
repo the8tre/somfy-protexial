@@ -22,13 +22,15 @@
           "armed_away": "Arm away (Zones A+B+C)",
           "armed_night": "Arm night (Zones A+B)",
           "armed_home": "Arm home (Zone A only)",
+          "arm_code": "Optional 4 digits arm code",
           "scan_interval": "Scan interval (seconds)"
         }
       }
     },
     "error": {
       "auth": "Wrong Username/Password/Code.",
-      "connection": "Unable to connect to the server."
+      "connection": "Unable to connect to the server.",
+      "arm_code": "Arm code must be 4 digits."
     }
   }
 }

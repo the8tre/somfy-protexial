@@ -21,13 +21,15 @@
           "armed_away": "Armer en absence (Zones A+B+C)",
           "armed_night": "Armer pour la nuit (Zones A+B)",
           "armed_home": "Armer en présence (Zone A seulement)",
+          "arm_code": "Code d'armement à 4 chiffres optionnel",
           "scan_interval": "Interval de rafraîchissement (seconds)"
         }
       }
     },
     "error": {
       "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
-      "connection": "Impossible de joindre le serveur."
+      "connection": "Impossible de joindre le serveur.",
+      "arm_code": "Le code d'armement doit comporter 4 chiffres."
     }
   }
 }
