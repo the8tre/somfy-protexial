@@ -6,7 +6,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Project Maintenance][maintenance-shield]][user_profile]
 
-![example](assets/header.png)
+![header](assets/header.png)
 
 ## À propos
 
@@ -37,14 +37,15 @@ Les entités suivantes sont gérées:
 ### 1. Adresse de la centrale
 
 - Saisisser l'URL de l'interface web locale de votre centrale: `http://192.168.1.234`
-  <img src="assets/welcome.png"  width="50%">
+  ![welcome](assets/welcome.png)
+
 
 ### 2. Identifiants de l'utilisateur
 
 - Utilisateur: `"u"`, conserver la valeur pré-remplie
 - Mot de passe: Saisir le mot de passe habituellement utilisé
 - Code: Saisir le code de la carte d'authentification correspondant au challenge demandé
-  <img src="assets/step2.png"  width="50%">
+  ![step2](assets/step2.png)
 
 ### 3. Configuration additionelle
 
@@ -57,7 +58,7 @@ Les différents modes d'armement exploitent les zones définies par la cofigurat
 Code d'armement: Si vous spécifiez un code celui-ci sera demandé lors de l'armement/désarmement.
 
 Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défaut.
-<img src="assets/step3.png"  width="50%">
+![step3](assets/step3.png)
 
 ## À noter
 
