@@ -8,5 +8,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/the8tre/somfy-protexial/issues",
   "requirements": ["pyquery==2.0.0"],
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
