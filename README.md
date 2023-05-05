@@ -84,7 +84,7 @@ Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défau
 Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
 |Modèle|Version|Statut|
 |------|-------|------|
-|Protexial|`v8_1`|:white*check_mark:|
+|Protexial|`v8_1`|:white_check_mark:|
 |Protexiom|`v?*?`|:grey_question:|
 
 Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
