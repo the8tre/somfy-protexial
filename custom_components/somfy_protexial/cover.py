@@ -1,14 +1,15 @@
 import logging
 
-from homeassistant.components.cover import CoverDeviceClass
-from homeassistant.components.cover import CoverEntity
-from homeassistant.components.cover import CoverEntityFeature
+from homeassistant.components.cover import (
+    CoverDeviceClass,
+    CoverEntity,
+    CoverEntityFeature,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import API
-from .const import DOMAIN
+from .const import API, DOMAIN
 from .protexial import SomfyProtexial
 
 DEFAULT_COVER_NAME = "Somfy Protexial"

@@ -1,31 +1,29 @@
 import logging
 import re
-from typing import Any, Callable
 from urllib.parse import urlparse
 
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
-from homeassistant.const import CONF_PASSWORD
-from homeassistant.const import CONF_SCAN_INTERVAL
-from homeassistant.const import CONF_URL
-from homeassistant.const import CONF_USERNAME
-from homeassistant.const import STATE_ALARM_ARMED_HOME
-from homeassistant.const import STATE_ALARM_ARMED_NIGHT
-from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.selector import NumberSelector
-from homeassistant.helpers.selector import NumberSelectorConfig
-from homeassistant.helpers.selector import NumberSelectorMode
-from homeassistant.helpers.selector import TextSelector
-from homeassistant.helpers.selector import TextSelectorConfig
-from homeassistant.helpers.selector import TextSelectorType
+from homeassistant.const import (
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_URL,
+    CONF_USERNAME,
+    STATE_ALARM_ARMED_HOME,
+    STATE_ALARM_ARMED_NIGHT,
+)
+from homeassistant.helpers import aiohttp_client, config_validation as cv
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
+import voluptuous as vol
 
-from .const import CONF_ARM_CODE
-from .const import CONF_CODE
-from .const import CONF_CODES
-from .const import CONF_MODES
-from .const import DOMAIN
+from .const import CONF_ARM_CODE, CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -99,7 +97,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             arm_code = user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
-            if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
+            if (arm_code is None or re.match("^[0-9]{4}$", str(arm_code))):
                 modes = []
                 # if user_input[STATE_ALARM_ARMED_AWAY]:
                 modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)

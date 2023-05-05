@@ -1,25 +1,23 @@
 """
 Somfy Protexial
 """
-import logging
 from datetime import timedelta
+import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD
-from homeassistant.const import CONF_SCAN_INTERVAL
-from homeassistant.const import CONF_URL
-from homeassistant.const import CONF_USERNAME
-from homeassistant.const import Platform
+from homeassistant.const import (
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    CONF_URL,
+    CONF_USERNAME,
+    Platform,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.update_coordinator import UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import API
-from .const import CONF_CODES
-from .const import COORDINATOR
-from .const import DOMAIN
+from .const import API, CONF_CODES, COORDINATOR, DOMAIN
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
