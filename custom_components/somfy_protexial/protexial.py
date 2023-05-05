@@ -1,11 +1,10 @@
 import asyncio
-import logging
 from enum import Enum
+import logging
 from xml.etree import ElementTree as ET
 
+from aiohttp import ClientError, ClientSession
 import async_timeout
-from aiohttp import ClientError
-from aiohttp import ClientSession
 from pyquery import PyQuery as pq
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
