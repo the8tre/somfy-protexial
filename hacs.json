@@ -1,7 +1,5 @@
 {
   "name": "Somfy Protexial",
   "hacs": "1.6.0",
-  "homeassistant": "2022.8.0",
-  "zip_release": true,
-  "filename": "somfy_protexial.zip"
+  "homeassistant": "2022.8.0"
 }
