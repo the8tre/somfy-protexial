@@ -51,9 +51,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {vol.Required(CONF_URL): cv.string}
-            ),
+            data_schema=vol.Schema({vol.Required(CONF_URL): cv.string}),
             errors=errors,
         )
 
@@ -92,11 +90,12 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-
     async def async_step_config(self, user_input):
         errors = {}
         if user_input is not None:
-            arm_code = user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
+            arm_code = (
+                user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
+            )
             if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
                 modes = []
                 # if user_input[STATE_ALARM_ARMED_AWAY]:

@@ -122,4 +122,4 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     def check_arm_code(self, code):
         if not self.arm_code == code:
-            raise HomeAssistantError('Invalid code')
+            raise HomeAssistantError("Invalid code")
