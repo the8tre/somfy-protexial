@@ -97,7 +97,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             arm_code = user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
-            if (arm_code is None or re.match("^[0-9]{4}$", str(arm_code))):
+            if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
                 modes = []
                 # if user_input[STATE_ALARM_ARMED_AWAY]:
                 modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
