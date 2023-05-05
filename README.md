@@ -1,67 +1,99 @@
 # Somfy Protexial
 
 [![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
 [![License][license-shield]](LICENSE)
 
-[![pre-commit][pre-commit-shield]][pre-commit]
-[![Black][black-shield]][black]
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
+![example](assets/header.png)
 
-**TO BE REMOVED: If you need help, as a developer, to use this custom component tempalte,
-please look at the [User Guide in the Cookiecutter documentation](https://cookiecutter-homeassistant-custom-component.readthedocs.io/en/stable/quickstart.html)**
+## À propos
 
-**This component will set up the following platforms.**
+Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial et permet le pilotage:
 
-| Platform        | Description                         |
+- de l'alarme par zones (A+B+C, A+B, A)
+- des volets roulants
+- des lumières
+
+Les entités suivantes sont gérées:
+| Entité | Description |
 | --------------- | ----------------------------------- |
-| `binary_sensor` | Show something `True` or `False`.   |
-| `sensor`        | Show info from Somfy Protexial API. |
-| `switch`        | Switch something `True` or `False`. |
-
-![example][exampleimg]
+| `alarm_control_panel.somfy_protexial` | Support des modes `armed_away`, `armed_home`, `armed_night` |
+| `cover.somfy_protexial` | Ouverture, fermeture et arrêt. Pas de contrôle de position. |
+| `light.somfy_protexial` | Allumé ou éteint (état maintenu par l'intégration). |
 
 ## Installation
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `somfy_protexial`.
-4. Download _all_ the files from the `custom_components/somfy_protexial/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Somfy Protexial"
+### Option A: Installation via HACS (recommandé)
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
+1. Ajouter ce repository GitHub à HACS
+   - [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=integration&repository=somfy-protexial&owner=the8tre)
+     </br>ou manuellement
+   - HACS :arrow_right: Intégrations :arrow_right: Menu '...' :arrow_right: Dépôts personnalisés
+   - Dépôt: `https://github.com/the8tre/somfy-protexial`
+   - Catégorie: `Intégration`
+2. Télécharger l'intégration
+   - HACS :arrow_right: Intégrations :arrow_right: Somfy Protexial :arrow_right: Télécharger
+3. Redémarrer Home Assistant
 
-```text
-custom_components/somfy_protexial/translations/en.json
-custom_components/somfy_protexial/translations/fr.json
-custom_components/somfy_protexial/translations/nb.json
-custom_components/somfy_protexial/translations/sensor.en.json
-custom_components/somfy_protexial/translations/sensor.fr.json
-custom_components/somfy_protexial/translations/sensor.nb.json
-custom_components/somfy_protexial/translations/sensor.nb.json
-custom_components/somfy_protexial/__init__.py
-custom_components/somfy_protexial/api.py
-custom_components/somfy_protexial/binary_sensor.py
-custom_components/somfy_protexial/config_flow.py
-custom_components/somfy_protexial/const.py
-custom_components/somfy_protexial/manifest.json
-custom_components/somfy_protexial/sensor.py
-custom_components/somfy_protexial/switch.py
-```
+### Option B: Installation manuelle
 
-## Configuration is done in the UI
+1. Télécharger l'archive de la dernière version disponible: [somfy_protexial.zip](https://github.com/the8tre/somfy-protexial/releases/latest/download/somfy_protexial.zip)
+2. Localiser le répertoire contenant le fichier `configuration.yaml` dans votre installation de HA
+3. Si il n'y a pas de répertoire `custom_components` le créer
+4. Créer un répertoire `somfy_protexial` dans `custom_components`
+5. Extraire le contenu de `somfy_protexial.zip` dans le répertoire `somfy_protexial`
+6. Redémarrer Home Assistant
 
-<!---->
+## Configuration
 
-## Contributions are welcome!
+- Ajouter l'intégration: [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=somfy_protexial)
+  </br>ou manuellement
+- Paramètres :arrow_right: Appareils et services :arrow_right: + Ajouter une intégration :arrow_right: Somfy Protexial
+
+### 1. Adresse de la centrale
+
+- Saisisser l'URL de l'interface web locale de votre centrale: `http://192.168.1.234`
+  <img src="assets/welcome.png"  width="50%">
+
+### 2. Identifiants de l'utilisateur
+
+- Utilisateur: `"u"`, conserver la valeur pré-remplie
+- Mot de passe: Saisir le mot de passe habituellement utilisé
+- Code: Saisir le code de la carte d'authentification correspondant au challenge demandé
+  <img src="assets/step2.png"  width="50%">
+
+### 3. Configuration additionelle
+
+Les différents modes d'armement exploitent les zones définies par la cofiguration de la centrale Somfy:
+
+- Armement en absence (toujours configuré): Zones A+B+C
+- Armement pour la nuit (optionnel): Zones A+B
+- Armement en présence (optionnel): Zones A
+
+Code d'armement: Si vous spécifiez un code celui-ci sera demandé lors de l'armement/désarmement.
+
+Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défaut.
+<img src="assets/step3.png"  width="50%">
+
+## À noter
+
+### Compatibilité de version
+
+Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
+|Modèle|Version|Statut|
+|------|-------|------|
+|Protexial|`v8_1`|:white*check_mark:|
+|Protexiom|`v?*?`|:grey_question:|
+
+Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
+
+### Utilisation de l'interface web d'origine
+
+La centrale ne gérant qu'une seule session utilisateur à la fois il est nécesaire de désactiver temporairement l'intégration si vous voulez pouvoir utiliser l'interface web.
+
+## Les contributions sont les bienvenues !
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
 
@@ -74,23 +106,10 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 ---
 
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
-[black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
-[buymecoffee]: https://www.buymeacoffee.com/the8tre
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/the8tre/somfy-protexial.svg?style=for-the-badge
-[commits]: https://github.com/the8tre/somfy-protexial/commits/main
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[exampleimg]: example.png
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
-[forum]: https://community.home-assistant.io/
-[license-shield]: https://img.shields.io/github/license/the8tre/somfy-protexial.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-%40the8tre-blue.svg?style=for-the-badge
-[pre-commit]: https://github.com/pre-commit/pre-commit
-[pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/the8tre/somfy-protexial.svg?style=for-the-badge
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square
+[license-shield]: https://img.shields.io/github/license/the8tre/somfy-protexial.svg?style=flat-square
+[maintenance-shield]: https://img.shields.io/badge/maintainer-%40the8tre-blue.svg?style=flat-square
+[releases-shield]: https://img.shields.io/github/release/the8tre/somfy-protexial.svg?style=flat-square
 [releases]: https://github.com/the8tre/somfy-protexial/releases
 [user_profile]: https://github.com/the8tre
