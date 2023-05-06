@@ -17,11 +17,16 @@ Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial 
 - des lumières
 
 Les entités suivantes sont gérées:
-| Entité | Description |
-| --------------- | ----------------------------------- |
-| `alarm_control_panel.somfy_protexial` | Support des modes `armed_away`, `armed_home`, `armed_night` |
-| `cover.somfy_protexial` | Ouverture, fermeture et arrêt. Pas de contrôle de position. |
-| `light.somfy_protexial` | Allumé ou éteint (état maintenu par l'intégration). |
+| Entité                              | Description                                                 |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `alarm_control_panel.alarme`        | Support des modes `armed_away`, `armed_home`, `armed_night` |
+| `cover.volets`                      | Ouverture, fermeture et arrêt. Pas de contrôle de position. |
+| `light.lumieres`                    | Allumé ou éteint (état maintenu par l'intégration).         |
+| `binary_sensor.batterie`            | Etat aggrégé des batteries des éléments.                    |
+| `binary_sensor.boitier`             | Etat du boitier.                                            |
+| `binary_sensor.communication_radio` | Etat de la communication radio.                             |
+| `binary_sensor.mouvement_detecte`   | Etat de détection de mouvement.                             |
+| `binary_sensor.porte_ou_fenetre`    | Etat d'ouvertue de porte ou fenêtre.                        |
 
 ## Installation
 
@@ -82,10 +87,10 @@ Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défau
 ### Compatibilité de version
 
 Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
-|Modèle|Version|Statut|
-|------|-------|------|
-|Protexial|`v8_1`|:white_check_mark:|
-|Protexiom|`v?*?`|:grey_question:|
+| Modèle    | Version | Statut             |
+| --------- | ------- | ------------------ |
+| Protexial | `v8_1`  | :white_check_mark: |
+| Protexiom | `v?*?`  | :grey_question:    |
 
 Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
 

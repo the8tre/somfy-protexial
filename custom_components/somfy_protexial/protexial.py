@@ -20,6 +20,9 @@ class Status:
     alarm = "ok"
     box = "ok"
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
     def __str__(self):
         return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}"
 

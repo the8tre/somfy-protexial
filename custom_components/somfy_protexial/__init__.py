@@ -6,6 +6,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_SW_VERSION,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -13,11 +14,13 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import aiohttp_client, device_registry as dr
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import API, CONF_CODES, COORDINATOR, DOMAIN
+from .const import API, CONF_CODES, COORDINATOR, DEVICE_INFO, DOMAIN
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,6 +31,7 @@ PLATFORMS = [
     Platform.ALARM_CONTROL_PANEL,
     Platform.COVER,
     Platform.LIGHT,
+    Platform.BINARY_SENSOR,
 ]
 
 
@@ -65,7 +69,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL)),
     )
 
-    hass.data[DOMAIN][entry.entry_id] = {API: protexial, COORDINATOR: coordinator}
+    device_registry = dr.async_get(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, "centrale")},
+        connections={(CONNECTION_NETWORK_MAC, entry.data.get(CONF_URL))},
+        manufacturer="Somfy",
+        name="Somfy Protexial",
+        model="Protexial",
+        sw_version=entry.data.get(ATTR_SW_VERSION),
+    )
+
+    device_info = DeviceInfo(
+        identifiers={(DOMAIN, "centrale")},
+        connections={(CONNECTION_NETWORK_MAC, entry.data.get(CONF_URL))},
+        name="Somfy Protexial",
+        manufacturer="Somfy",
+        model="Protexial",
+        sw_version=entry.data.get(ATTR_SW_VERSION),
+    )
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        API: protexial,
+        COORDINATOR: coordinator,
+        DEVICE_INFO: device_info,
+    }
 
     await coordinator.async_config_entry_first_refresh()
 
