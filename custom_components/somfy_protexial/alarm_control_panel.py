@@ -17,10 +17,10 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import API, CONF_ARM_CODE, CONF_MODES, COORDINATOR, DOMAIN
+from .const import API, CONF_ARM_CODE, CONF_MODES, COORDINATOR, DEVICE_INFO, DOMAIN
 from .protexial import Zone
 
-DEFAULT_ALARM_NAME = "Somfy Protexial"
+DEFAULT_ALARM_NAME = "Alarme"
 ACTIVATION_ALARM_CODE = None
 ALARM_STATE = None
 
@@ -33,17 +33,20 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
+    device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
     api = hass.data[DOMAIN][config_entry.entry_id][API]
     modes = config_entry.data.get(CONF_MODES)
     arm_code = config_entry.data.get(CONF_ARM_CODE)
     alarms = []
-    alarms.append(ProtexialAlarm(coordinator, api, modes, arm_code))
+    alarms.append(ProtexialAlarm(device_info, coordinator, api, modes, arm_code))
     async_add_entities(alarms)
 
 
 class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
-    def __init__(self, coordinator, api, modes, arm_code):
+    def __init__(self, device_info, coordinator, api, modes, arm_code):
         super().__init__(coordinator)
+        self._attr_unique_id = f"{DOMAIN}_control_alarm"
+        self._attr_device_info = device_info
         self.coordinator = coordinator
         self.api = api
         self.modes = modes

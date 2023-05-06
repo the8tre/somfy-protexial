@@ -34,6 +34,8 @@ Les entités suivantes sont gérées:
 
 {% endif %}
 
+## Configuration
+
 ### 1. Adresse de la centrale
 
 - Saisisser l'URL de l'interface web locale de votre centrale: `http://192.168.1.234`

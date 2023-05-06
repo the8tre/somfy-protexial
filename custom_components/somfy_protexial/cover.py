@@ -9,10 +9,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import API, DOMAIN
+from .const import API, DEVICE_INFO, DOMAIN
 from .protexial import SomfyProtexial
 
-DEFAULT_COVER_NAME = "Somfy Protexial"
+DEFAULT_COVER_NAME = "Volets"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,14 +23,17 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     api = hass.data[DOMAIN][config_entry.entry_id][API]
+    device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
     lights = []
-    lights.append(ProtexialCover(api))
+    lights.append(ProtexialCover(device_info, api))
     async_add_entities(lights)
 
 
 class ProtexialCover(CoverEntity):
-    def __init__(self, api: SomfyProtexial):
+    def __init__(self, device_info, api: SomfyProtexial):
         super().__init__()
+        self._attr_unique_id = f"{DOMAIN}_control_cover"
+        self._attr_device_info = device_info
         self.api = api
 
     @property

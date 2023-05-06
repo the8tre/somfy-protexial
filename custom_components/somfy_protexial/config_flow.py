@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from homeassistant import config_entries
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.const import (
+    ATTR_SW_VERSION,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -66,6 +67,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.codes = await self.protexial.get_challenge_card(
                     self.username, self.password, self.code
                 )
+                self.version = await self.protexial.get_version()
 
                 return await self.async_step_config(None)
             except Exception as e:
@@ -114,6 +116,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_MODES: modes,
                         CONF_ARM_CODE: arm_code,
                         CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
+                        ATTR_SW_VERSION: self.version,
                     },
                 )
             else:
