@@ -2,8 +2,6 @@ import logging
 import re
 from urllib.parse import urlparse
 
-import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.const import (
@@ -24,6 +22,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
     TextSelectorType,
 )
+import voluptuous as vol
 
 from .const import CONF_ARM_CODE, CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
 from .protexial import SomfyProtexial
