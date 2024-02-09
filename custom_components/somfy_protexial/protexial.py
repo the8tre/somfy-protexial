@@ -98,7 +98,7 @@ class SomfyProtexial:
                         method, path, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == Page.ERROR:
-                    dom = pq(await response.text())
+                    dom = pq(await response.text("latin1"))
                     error_element = dom(Selector.ERROR_ELEMENT)
                     if not error_element:
                         raise Exception("Unknown error")
@@ -167,11 +167,11 @@ class SomfyProtexial:
 
     async def get_version(self):
         response = await self.__do_call("get", Page.VERSION, login=False)
-        return await response.text()
+        return await response.text("latin1")
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
-        dom = pq(await login_response.text())
+        dom = pq(await login_response.text("latin1"))
         challenge_element = dom(Selector.CHALLENGE_ELEMENT)
         if challenge_element:
             return challenge_element.text()
@@ -201,7 +201,7 @@ class SomfyProtexial:
 
     async def get_status(self):
         status_response = await self.__do_call("get", Page.STATUS)
-        content = await status_response.text()
+        content = await status_response.text("latin1")
         response = ET.fromstring(content)
         status = Status()
         for child in response:
@@ -227,7 +227,7 @@ class SomfyProtexial:
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
         status_response = await self.__do_call("get", Page.PRINT, login=False)
-        dom = pq(await status_response.text())
+        dom = pq(await status_response.text("latin1"))
         all_challenge_elements = dom(Selector.CHALLENGE_ELEMENT_LIST)
         challenges = {}
         chars = ["A", "B", "C", "D", "E", "F"]
@@ -277,7 +277,7 @@ class SomfyProtexial:
     async def close_cover(self):
         form = {"hidden": "hidden", "btn_vol_down": ""}
         response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text())
+        print(await response.text("latin1"))
 
     async def stop_cover(self):
         form = {"hidden": "hidden", "btn_vol_stop": ""}

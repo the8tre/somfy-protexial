@@ -133,7 +133,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_ARM_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
                     ),
-                    vol.Required(CONF_SCAN_INTERVAL, default=20): NumberSelector(
+                    vol.Required(CONF_SCAN_INTERVAL, default=60): NumberSelector(
                         NumberSelectorConfig(
                             mode=NumberSelectorMode.BOX, min=15, max=3600, step=1
                         )
