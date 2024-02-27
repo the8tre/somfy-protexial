@@ -99,6 +99,9 @@ Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
 
 La centrale ne gérant qu'une seule session utilisateur à la fois il est nécesaire de désactiver temporairement l'intégration si vous voulez pouvoir utiliser l'interface web.
 
+### Re-configuration de l'intégration
+L'intégration de supporte pas à ce jour la re-configuration. Il faut supprimer et re-créer l'entrée pour y amener des changements.
+
 ## Les contributions sont les bienvenues !
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
