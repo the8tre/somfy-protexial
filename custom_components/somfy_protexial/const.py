@@ -1,8 +1,10 @@
+from enum import Enum
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import EntityCategory
 
 DOMAIN = "somfy_protexial"
 
+CONF_API_TYPE = "api_type"
 CONF_CODE = "code"
 CONF_CODES = "codes"
 CONF_MODES = "modes"
@@ -11,6 +13,24 @@ CONF_ARM_CODE = "arm_code"
 API = "api"
 COORDINATOR = "coordinator"
 DEVICE_INFO = "device_info"
+
+
+class ApiType(str, Enum):
+    PROTEXIAL = "protexial"
+    PROTEXIOM = "protexiom"
+
+
+class Page(str, Enum):
+    LOGIN = "login"
+    LOGOUT = "logout"
+    PILOTAGE = "pilotage"
+    STATUS = "status"
+    ERROR = "error"
+    ELEMENTS = "elements"
+    PRINT = "print"
+    VERSION = "version"
+    DEFAULT = "default"
+
 
 BINARY_SENSORS = [
     {

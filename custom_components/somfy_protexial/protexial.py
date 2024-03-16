@@ -7,6 +7,8 @@ from aiohttp import ClientError, ClientSession
 import async_timeout
 from pyquery import PyQuery as pq
 
+from .const import ApiType, Page
+
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 
@@ -26,18 +28,30 @@ class Status:
     def __str__(self):
         return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}"
 
-
-class Page(str, Enum):
-    LOGIN = "/fr/login.htm"
-    LOGOUT = "/logout.htm"
-    PILOTAGE = "/fr/u_pilotage.htm"
-    STATUS = "/status.xml"
-    ERROR = "/fr/error.htm"
-    ELEMENTS = "/fr/u_plistelmt.htm"
-    PRINT = "/fr/u_print.htm"
-    VERSION = "/cfg/vers"
-    DEFAULT = "/default.htm"
-
+PAGES = {
+    ApiType.PROTEXIAL: {
+        Page.LOGIN: "/fr/login.htm",
+        Page.LOGOUT: "/logout.htm",
+        Page.PILOTAGE: "/fr/u_pilotage.htm",
+        Page.STATUS: "/status.xml",
+        Page.ERROR: "/fr/error.htm",
+        Page.ELEMENTS: "/fr/u_plistelmt.htm",
+        Page.PRINT: "/fr/u_print.htm",
+        Page.VERSION: "/cfg/vers",
+        Page.DEFAULT: "/default.htm",
+    },
+    ApiType.PROTEXIOM: {
+        Page.LOGIN: "/login.htm",
+        Page.LOGOUT: "/logout.htm",
+        Page.PILOTAGE: "/u_pilotage.htm",
+        Page.STATUS: "/status.xml",
+        Page.ERROR: "/error.htm",
+        Page.ELEMENTS: "/u_plistelmt.htm",
+        Page.PRINT: "/u_print.htm",
+        Page.VERSION: None,
+        Page.DEFAULT: "/default.htm",
+    }
+}
 
 class Selector(str, Enum):
     CHALLENGE_ELEMENT = "#form_id table tr:nth-child(4) td:nth-child(1) b"
@@ -65,9 +79,10 @@ TIMEOUT = 10
 
 class SomfyProtexial:
     def __init__(
-        self, session: ClientSession, url, username=None, password=None, codes=None
+        self, session: ClientSession, url, api_type=None, username=None, password=None, codes=None
     ):
         self.url = url
+        self.api_type = api_type
         self.username = username
         self.password = password
         self.codes = codes
@@ -75,9 +90,10 @@ class SomfyProtexial:
         self.cookie = None
 
     async def __do_call(
-        self, method, path, headers={}, data=None, retry=True, login=True
+        self, method, page, headers={}, data=None, retry=True, login=True
     ):
         try:
+            path = PAGES[self.api_type][page]
             if self.cookie:
                 headers["Cookie"] = self.cookie
             if data:
@@ -92,12 +108,12 @@ class SomfyProtexial:
                     )
 
             if response.status == 200:
-                if response.real_url.path == Page.DEFAULT and retry is True:
+                if response.real_url.path == PAGES[self.api_type][Page.DEFAULT] and retry is True:
                     await self.__login()
                     return await self.__do_call(
-                        method, path, headers, data, retry=False, login=False
+                        method, page, headers, data, retry=False, login=False
                     )
-                elif response.real_url.path == Page.ERROR:
+                elif response.real_url.path == PAGES[self.api_type][Page.ERROR]:
                     dom = pq(await response.text("latin1"))
                     error_element = dom(Selector.ERROR_ELEMENT)
                     if not error_element:
@@ -110,7 +126,7 @@ class SomfyProtexial:
                     ):
                         await self.__login()
                         return await self.__do_call(
-                            method, path, headers, data, retry=False, login=False
+                            method, page, headers, data, retry=False, login=False
                         )
                     elif errorCode == Error.SESSION_ALREADY_OPEN:
                         if retry:
@@ -125,7 +141,7 @@ class SomfyProtexial:
                             if login:
                                 await self.__login()
                             return await self.__do_call(
-                                method, path, headers, data, retry=False, login=login
+                                method, page, headers, data, retry=False, login=login
                             )
                         else:
                             raise Exception("Too many login retries")
@@ -148,7 +164,7 @@ class SomfyProtexial:
                 exception,
             )
             raise Exception(
-                f"Timeout error fetching information from {path} - {exception}"
+                f"Timeout error fetching information from {PAGES[self.api_type][path]} - {exception}"
             )
 
         except ClientError as exception:
@@ -166,8 +182,71 @@ class SomfyProtexial:
         await self.__login()
 
     async def get_version(self):
-        response = await self.__do_call("get", Page.VERSION, login=False)
-        return await response.text("latin1")
+        if PAGES[self.api_type][Page.VERSION] != None:
+            response = await self.__do_call("get", Page.VERSION, login=False)
+            return await response.text("latin1")
+        else:
+            return "0.0"
+
+    async def guess_and_set_api_type(self):
+        # Is is a Protexial centrale having a version page
+        versionPagePath = PAGES[ApiType.PROTEXIAL][Page.VERSION]
+        try:
+            async with async_timeout.timeout(TIMEOUT):
+                response = await self.session.get(self.url + versionPagePath, headers={})
+            if response.status == 200:
+                # Looks like it's a model supporting the Protexial API
+                self.api_type = ApiType.PROTEXIAL
+                return self.api_type
+            # elif response.status == 404:
+                # Looks like another model
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching information from %s - %s",
+                versionPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Timeout error fetching information from {versionPagePath} - {exception}"
+            )
+
+        except ClientError as exception:
+            _LOGGER.error(
+                "Error fetching information from %s - %s",
+                versionPagePath,
+                exception,
+            )
+            raise Exception(f"Error fetching information from {versionPagePath} - {exception}")
+        except Exception as exception:
+            _LOGGER.error("Something really wrong happened! - %s", exception)
+
+        defaultPagePath = PAGES[ApiType.PROTEXIOM][Page.DEFAULT]
+        try:
+            async with async_timeout.timeout(TIMEOUT):
+                response = await self.session.get(self.url + defaultPagePath, headers={})
+            if response.status == 200:
+                self.api_type = ApiType.PROTEXIOM
+                return self.api_type
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching information from %s - %s",
+                defaultPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Timeout error fetching information from {defaultPagePath} - {exception}"
+            )
+
+        except ClientError as exception:
+            _LOGGER.error(
+                "Error fetching information from %s - %s",
+                PAGES[ApiType.PROTEXIAL][Page.VERSION],
+                exception,
+            )
+            raise Exception(f"Error fetching information from {defaultPagePath} - {exception}")
+        except Exception as exception:
+            # Is it a 404 ? => Page doesn't exist, this doesn't look like a Somfy Centrale
+            _LOGGER.error("Something really wrong happened! - %s", exception)
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
