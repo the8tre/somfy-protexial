@@ -198,8 +198,7 @@ class SomfyProtexial:
                 # Looks like it's a model supporting the Protexial API
                 self.api_type = ApiType.PROTEXIAL
                 return self.api_type
-            # elif response.status == 404:
-                # Looks like another model
+            # Looks like another model
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
                 "Timeout error fetching information from %s - %s",
@@ -209,7 +208,6 @@ class SomfyProtexial:
             raise Exception(
                 f"Timeout error fetching information from {versionPagePath} - {exception}"
             )
-
         except ClientError as exception:
             _LOGGER.error(
                 "Error fetching information from %s - %s",
@@ -220,33 +218,34 @@ class SomfyProtexial:
         except Exception as exception:
             _LOGGER.error("Something really wrong happened! - %s", exception)
 
-        defaultPagePath = PAGES[ApiType.PROTEXIOM][Page.DEFAULT]
+        # Maybe this is an older version without the locale in the path
+        errorPagePath = PAGES[ApiType.PROTEXIOM][Page.ERROR]
         try:
             async with async_timeout.timeout(TIMEOUT):
-                response = await self.session.get(self.url + defaultPagePath, headers={})
+                response = await self.session.get(self.url + errorPagePath, headers={})
             if response.status == 200:
                 self.api_type = ApiType.PROTEXIOM
                 return self.api_type
+            _LOGGER.error("Didn't find the error page, doesn't look like a Somfy centrale")
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
                 "Timeout error fetching information from %s - %s",
-                defaultPagePath,
+                errorPagePath,
                 exception,
             )
             raise Exception(
-                f"Timeout error fetching information from {defaultPagePath} - {exception}"
+                f"Timeout error fetching information from {errorPagePath} - {exception}"
             )
-
         except ClientError as exception:
             _LOGGER.error(
                 "Error fetching information from %s - %s",
-                PAGES[ApiType.PROTEXIAL][Page.VERSION],
+                errorPagePath,
                 exception,
             )
-            raise Exception(f"Error fetching information from {defaultPagePath} - {exception}")
+            raise Exception(f"Error fetching information from {errorPagePath} - {exception}")
         except Exception as exception:
-            # Is it a 404 ? => Page doesn't exist, this doesn't look like a Somfy Centrale
             _LOGGER.error("Something really wrong happened! - %s", exception)
+        raise Exception("Didn't find the error page, doesn't look like a Somfy centrale")
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
