@@ -32,6 +32,7 @@ class Status:
     def __str__(self):
         return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
 
+
 PAGES = {
     ApiType.PROTEXIAL: {
         Page.LOGIN: "/fr/login.htm",
@@ -54,8 +55,9 @@ PAGES = {
         Page.PRINT: "/u_print.htm",
         Page.VERSION: None,
         Page.DEFAULT: "/default.htm",
-    }
+    },
 }
+
 
 class Selector(str, Enum):
     CHALLENGE_ELEMENT = "#form_id table tr:nth-child(4) td:nth-child(1) b"
@@ -69,6 +71,7 @@ class Error(str, Enum):
     WRONG_CREDENTIALS = "(0x0812)"
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
+    UNKNOWN_PARAMETER = "(0x0A03)"
 
 
 class Zone(Enum):
@@ -104,15 +107,23 @@ class SomfyProtexial:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
             async with async_timeout.timeout(TIMEOUT):
+                _LOGGER.debug(f"Call to: {self.url + path}")
                 if method == "get":
                     response = await self.session.get(self.url + path, headers=headers)
                 elif method == "post":
+                    _LOGGER.debug(f"With payload: {data}")
                     response = await self.session.post(
                         self.url + path, data=data, headers=headers
                     )
+            _LOGGER.debug(f"Response path: {response.real_url.path}")
+            _LOGGER.debug(f"Response headers: {response.headers}")
+            _LOGGER.debug(f"Response body: {await response.text('latin1')}")
 
             if response.status == 200:
-                if response.real_url.path == PAGES[self.api_type][Page.DEFAULT] and retry is True:
+                if (
+                    response.real_url.path == PAGES[self.api_type][Page.DEFAULT]
+                    and retry is True
+                ):
                     await self.__login()
                     return await self.__do_call(
                         method, page, headers, data, retry=False, login=False
@@ -155,8 +166,10 @@ class SomfyProtexial:
                         raise Exception("Login failed: Max attempt count reached")
                     elif errorCode == Error.WRONG_CODE:
                         raise Exception("Login failed: Wrong code")
+                    elif errorCode == Error.UNKNOWN_PARAMETER:
+                        raise Exception("Login failed: Unknown parameter")
                     else:
-                        raise Exception("Login failed: Unknown error")
+                        raise Exception(f"Login failed: Unknown errorCode: {errorCode}")
                 else:
                     return response
             else:
@@ -197,8 +210,12 @@ class SomfyProtexial:
         versionPagePath = PAGES[ApiType.PROTEXIAL][Page.VERSION]
         try:
             async with async_timeout.timeout(TIMEOUT):
-                response = await self.session.get(self.url + versionPagePath, headers={})
+                _LOGGER.debug(f"Guess {self.url + versionPagePath}")
+                response = await self.session.get(
+                    self.url + versionPagePath, headers={}
+                )
             if response.status == 200:
+                _LOGGER.debug(f"Guess response: {await response.text('latin1')}")
                 # Looks like it's a model supporting the Protexial API
                 self.api_type = ApiType.PROTEXIAL
                 return self.api_type
@@ -218,7 +235,9 @@ class SomfyProtexial:
                 versionPagePath,
                 exception,
             )
-            raise Exception(f"Error fetching information from {versionPagePath} - {exception}")
+            raise Exception(
+                f"Error fetching information from {versionPagePath} - {exception}"
+            )
         except Exception as exception:
             _LOGGER.error("Something really wrong happened! - %s", exception)
 
@@ -226,11 +245,15 @@ class SomfyProtexial:
         errorPagePath = PAGES[ApiType.PROTEXIOM][Page.ERROR]
         try:
             async with async_timeout.timeout(TIMEOUT):
+                _LOGGER.debug(f"Guess {self.url + errorPagePath}")
                 response = await self.session.get(self.url + errorPagePath, headers={})
             if response.status == 200:
+                _LOGGER.debug(f"Guess response: {await response.text('latin1')}")
                 self.api_type = ApiType.PROTEXIOM
                 return self.api_type
-            _LOGGER.error("Didn't find the error page, doesn't look like a Somfy centrale")
+            _LOGGER.error(
+                "Didn't find the error page, doesn't look like a Somfy centrale"
+            )
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
                 "Timeout error fetching information from %s - %s",
@@ -246,10 +269,14 @@ class SomfyProtexial:
                 errorPagePath,
                 exception,
             )
-            raise Exception(f"Error fetching information from {errorPagePath} - {exception}")
+            raise Exception(
+                f"Error fetching information from {errorPagePath} - {exception}"
+            )
         except Exception as exception:
             _LOGGER.error("Something really wrong happened! - %s", exception)
-        raise Exception("Didn't find the error page, doesn't look like a Somfy centrale")
+        raise Exception(
+            "Didn't find the error page, doesn't look like a Somfy centrale"
+        )
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
@@ -266,7 +293,7 @@ class SomfyProtexial:
             challenge = await self.get_challenge()
             code = self.codes[challenge]
 
-        if self.api_type is ApiType.PROTEXIAL:
+        if self.api_type == ApiType.PROTEXIAL:
             form = {
                 "login": username if username else self.username,
                 "password": password if password else self.password,
