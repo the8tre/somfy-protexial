@@ -27,7 +27,14 @@ from homeassistant.helpers.selector import (
 )
 import voluptuous as vol
 
-from .const import CONF_API_TYPE, CONF_ARM_CODE, CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
+from .const import (
+    CONF_API_TYPE,
+    CONF_ARM_CODE,
+    CONF_CODE,
+    CONF_CODES,
+    CONF_MODES,
+    DOMAIN,
+)
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)

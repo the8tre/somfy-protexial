@@ -1,4 +1,5 @@
 from enum import Enum
+
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import EntityCategory
 

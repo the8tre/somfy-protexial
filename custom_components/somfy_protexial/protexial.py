@@ -205,7 +205,7 @@ class SomfyProtexial:
         await self.__login()
 
     async def get_version(self):
-        if PAGES[self.api_type][Page.VERSION] != None:
+        if PAGES[self.api_type][Page.VERSION] is not None:
             response = await self.__do_call("get", Page.VERSION, login=False)
             return await response.text("latin1")
         else:
