@@ -87,16 +87,20 @@ Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défau
 ### Compatibilité de version
 
 Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
-| Modèle    | Version | Statut             |
-| --------- | ------- | ------------------ |
-| Protexial | `v8_1`  | :white_check_mark: |
-| Protexiom | `v?*?`  | :grey_question:    |
+| Modèle         | Version  | Statut             |
+| -------------- | -------- | ------------------ |
+| Protexial      | `v8_1`   | :white_check_mark: |
+| Protexiom 5000 | `v10_3`  | :white_check_mark: |
+| Protexiom      | `v?*?`   | :grey_question:    |
 
 Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
 
 ### Utilisation de l'interface web d'origine
 
 La centrale ne gérant qu'une seule session utilisateur à la fois il est nécesaire de désactiver temporairement l'intégration si vous voulez pouvoir utiliser l'interface web.
+
+### Re-configuration de l'intégration
+L'intégration de supporte pas à ce jour la re-configuration. Il faut supprimer et re-créer l'entrée pour y amener des changements.
 
 ## Les contributions sont les bienvenues !
 
