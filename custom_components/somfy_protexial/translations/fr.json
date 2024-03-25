@@ -8,7 +8,7 @@
         }
       },
       "login": {
-        "description": "Saisisez le code pour le challenge {challenge}",
+        "description": "Saisissez le code pour le challenge {challenge}",
         "data": {
           "username": "Nom d'utilisateur",
           "password": "Mot de passe",
@@ -30,6 +30,20 @@
       "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
       "connection": "Impossible de joindre le serveur.",
       "arm_code": "Le code d'armement doit comporter 4 chiffres."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
+        "data": {
+          "armed_away": "Armer en absence (Zones A+B+C)",
+          "armed_night": "Armer pour la nuit (Zones A+B)",
+          "armed_home": "Armer en présence (Zone A seulement)",
+          "arm_code": "Code d'armement à 4 chiffres optionnel",
+          "scan_interval": "Interval de rafraîchissement (seconds)"
+        }
+      }
     }
   }
 }

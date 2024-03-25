@@ -1,6 +1,6 @@
 import logging
 
-from homeassistant.components.light import LightEntity
+from homeassistant.components.light import ColorMode, LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -45,6 +45,14 @@ class ProtexialLight(LightEntity):
     @property
     def is_on(self):
         return self._state
+
+    @property
+    def supported_color_modes(self):
+        return {ColorMode.ONOFF}
+
+    @property
+    def color_mode(self):
+        return ColorMode.ONOFF
 
     async def async_turn_on(self):
         await self.api.turn_light_on()
