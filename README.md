@@ -25,8 +25,10 @@ Les entités suivantes sont gérées:
 | `binary_sensor.batterie`            | Etat aggrégé des batteries des éléments.                    |
 | `binary_sensor.boitier`             | Etat du boitier.                                            |
 | `binary_sensor.communication_radio` | Etat de la communication radio.                             |
+| `binary_sensor.communication_gsm`   | Etat de la communication GSM.                               |
 | `binary_sensor.mouvement_detecte`   | Etat de détection de mouvement.                             |
 | `binary_sensor.porte_ou_fenetre`    | Etat d'ouvertue de porte ou fenêtre.                        |
+| `binary_sensor.camera`              | Etat de connexion de la caméra.                             |
 
 ## Installation
 
@@ -100,7 +102,7 @@ Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
 La centrale ne gérant qu'une seule session utilisateur à la fois il est nécesaire de désactiver temporairement l'intégration si vous voulez pouvoir utiliser l'interface web.
 
 ### Re-configuration de l'intégration
-L'intégration de supporte pas à ce jour la re-configuration. Il faut supprimer et re-créer l'entrée pour y amener des changements.
+L'intégration supporte la re-configuration à partie de l'interface graphique.
 
 ## Les contributions sont les bienvenues !
 

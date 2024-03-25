@@ -21,12 +21,16 @@ class Status:
     door = "ok"
     alarm = "ok"
     box = "ok"
+    gsm = "GSM connecté au réseau"
+    recgsm = "4"
+    opegsm = "Orange"
+    camera = "Disabled"
 
     def __getitem__(self, key):
         return getattr(self, key)
 
     def __str__(self):
-        return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}"
+        return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
 
 PAGES = {
     ApiType.PROTEXIAL: {
@@ -308,6 +312,14 @@ class SomfyProtexial:
                     status.zoneB = child.text
                 case "zone2":
                     status.zoneC = child.text
+                case "gsm":
+                    status.gsm = child.text
+                case "recgsm":
+                    status.recgsm = child.text
+                case "opegsm":
+                    status.opegsm = child.text
+                case "camera":
+                    status.camera = child.text
         return status
 
     async def get_challenge_card(self, username, password, code):

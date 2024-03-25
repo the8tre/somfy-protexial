@@ -1,6 +1,7 @@
 """
 Somfy Protexial
 """
+
 from datetime import timedelta
 import logging
 
@@ -96,11 +97,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         DEVICE_INFO: device_info,
     }
 
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
     await coordinator.async_config_entry_first_refresh()
 
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     )
+
     return True
 
 
@@ -131,3 +135,8 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             pass
 
     return True
+
+  
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle an options update."""
+    await hass.config_entries.async_reload(entry.entry_id)
