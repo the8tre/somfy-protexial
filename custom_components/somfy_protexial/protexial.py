@@ -262,12 +262,20 @@ class SomfyProtexial:
             challenge = await self.get_challenge()
             code = self.codes[challenge]
 
-        form = {
-            "login": username if username else self.username,
-            "password": password if password else self.password,
-            "key": code,
-            "btn_login": "Connexion",
-        }
+        if self.api_type is ApiType.PROTEXIAL:
+            form = {
+                "login": username if username else self.username,
+                "password": password if password else self.password,
+                "key": code,
+                "btn_login": "Connexion",
+            }
+        else:
+            form = {
+                "login": username if username else self.username,
+                "password": password if password else self.password,
+                "key": code,
+                "action": "Connexion",
+            }
         login_response = await self.__do_call(
             "post", Page.LOGIN, data=form, retry=False, login=False
         )
