@@ -2,8 +2,8 @@
 Somfy Protexial
 """
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -15,13 +15,22 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import aiohttp_client, device_registry as dr
+from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import API, ApiType, CONF_API_TYPE, CONF_CODES, COORDINATOR, DEVICE_INFO, DOMAIN
+from .const import (
+    API,
+    CONF_API_TYPE,
+    CONF_CODES,
+    COORDINATOR,
+    DEVICE_INFO,
+    DOMAIN,
+    ApiType,
+)
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -130,13 +139,19 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             # We can safely force the API to ApiType.PROTEXIAL
             new = {**config_entry.data}
             new[CONF_API_TYPE] = ApiType.PROTEXIAL
-            hass.config_entries.async_update_entry(config_entry, data=new, minor_version=2, version=1)
-            _LOGGER.debug("Migration to version %s.%s successful", config_entry.version, config_entry.minor_version)
+            hass.config_entries.async_update_entry(
+                config_entry, data=new, minor_version=2, version=1
+            )
+            _LOGGER.debug(
+                "Migration to version %s.%s successful",
+                config_entry.version,
+                config_entry.minor_version,
+            )
             pass
 
     return True
 
-  
+
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle an options update."""
     await hass.config_entries.async_reload(entry.entry_id)

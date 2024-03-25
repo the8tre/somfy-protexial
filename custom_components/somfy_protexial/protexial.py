@@ -1,10 +1,10 @@
 import asyncio
-from enum import Enum
 import logging
+from enum import Enum
 from xml.etree import ElementTree as ET
 
-from aiohttp import ClientError, ClientSession
 import async_timeout
+from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
 from .const import ApiType, Page
@@ -86,7 +86,13 @@ TIMEOUT = 10
 
 class SomfyProtexial:
     def __init__(
-        self, session: ClientSession, url, api_type=None, username=None, password=None, codes=None
+        self,
+        session: ClientSession,
+        url,
+        api_type=None,
+        username=None,
+        password=None,
+        codes=None,
     ):
         self.url = url
         self.api_type = api_type
