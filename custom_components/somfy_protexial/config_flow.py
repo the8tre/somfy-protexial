@@ -6,6 +6,7 @@ from homeassistant import config_entries
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.const import (
     ATTR_SW_VERSION,
+    CONF_API_TYPE,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -152,6 +153,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Create the options flow."""
         return ProtexialOptionsFlowHandler(config_entry)
 
+
 class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize Protexial options flow."""
@@ -193,20 +195,31 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "arm_code"
 
         currentModes = self.config_entry.data[CONF_MODES]
-        hasHomeMode = any(m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes)
-        hasNightMode = any(m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in currentModes)
+        hasHomeMode = any(
+            m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes
+        )
+        hasNightMode = any(
+            m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in currentModes
+        )
         return self.async_show_form(
             step_id="init",
             errors=errors,
             data_schema=vol.Schema(
                 {
                     # vol.Required(STATE_ALARM_ARMED_AWAY, default=True): cv.boolean,
-                    vol.Optional(STATE_ALARM_ARMED_NIGHT, default=hasNightMode): cv.boolean,
-                    vol.Optional(STATE_ALARM_ARMED_HOME, default=hasHomeMode): cv.boolean,
+                    vol.Optional(
+                        STATE_ALARM_ARMED_NIGHT, default=hasNightMode
+                    ): cv.boolean,
+                    vol.Optional(
+                        STATE_ALARM_ARMED_HOME, default=hasHomeMode
+                    ): cv.boolean,
                     vol.Optional(CONF_ARM_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
                     ),
-                    vol.Required(CONF_SCAN_INTERVAL, default=self.config_entry.data[CONF_SCAN_INTERVAL]): NumberSelector(
+                    vol.Required(
+                        CONF_SCAN_INTERVAL,
+                        default=self.config_entry.data[CONF_SCAN_INTERVAL],
+                    ): NumberSelector(
                         NumberSelectorConfig(
                             mode=NumberSelectorMode.BOX, min=15, max=3600, step=1
                         )
