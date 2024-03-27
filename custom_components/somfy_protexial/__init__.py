@@ -153,8 +153,6 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
                 config_entry.version,
                 config_entry.minor_version,
             )
-            pass
-
     return True
 
 
