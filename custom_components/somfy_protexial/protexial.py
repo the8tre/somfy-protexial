@@ -1,9 +1,9 @@
 import asyncio
-import logging
 from enum import Enum
+import logging
+from urllib.parse import urlencode
 from xml.etree import ElementTree as ET
 
-import async_timeout
 from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
@@ -67,7 +67,7 @@ class SomfyProtexial:
         username=None,
         password=None,
         codes=None,
-    ):
+    ) -> None:
         self.url = url
         self.api_type = api_type
         self.username = username
@@ -84,12 +84,15 @@ class SomfyProtexial:
         self,
         method,
         page,
-        headers={},
+        headers=None,
         data=None,
         retry=True,
         login=True,
         authenticated=True,
     ):
+        if headers is None:
+            headers = {}
+
         try:
             path = self.api.get_page(page)
             full_path = self.url + path
@@ -98,18 +101,20 @@ class SomfyProtexial:
             if data:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-            async with async_timeout.timeout(TIMEOUT):
+            async with asyncio.timeout(TIMEOUT):
                 _LOGGER.debug(f"Call to: {full_path}")
                 if method == "get":
                     response = await self.session.get(full_path, headers=headers)
                 elif method == "post":
+                    encodedData = urlencode(data, encoding="windows-1252")
                     _LOGGER.debug(f"With payload: {data}")
+                    _LOGGER.debug(f"With payload (encoded): {encodedData}")
                     response = await self.session.post(
-                        self.url + path, data=data, headers=headers
+                        self.url + path, data=encodedData, headers=headers
                     )
             _LOGGER.debug(f"Response path: {response.real_url.path}")
             _LOGGER.debug(f"Response headers: {response.headers}")
-            _LOGGER.debug(f"Response body: {await response.text('latin1')}")
+            _LOGGER.debug(f"Response body: {await response.text('windows-1252')}")
 
             if response.status == 200:
                 if (
@@ -121,7 +126,7 @@ class SomfyProtexial:
                         method, page, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == self.api.get_page(Page.ERROR):
-                    dom = pq(await response.text("latin1"))
+                    dom = pq(await response.text("windows-1252"))
                     error_element = dom(Selector.ERROR_ELEMENT)
                     if not error_element:
                         raise Exception("Unknown error")
@@ -197,7 +202,7 @@ class SomfyProtexial:
             response = await self.__do_call(
                 "get", Page.VERSION, login=False, authenticated=False
             )
-            return await response.text("latin1")
+            return await response.text("windows-1252")
         else:
             return "0.0"
 
@@ -206,13 +211,13 @@ class SomfyProtexial:
         # Is is a Protexial centrale having a version page
         versionPagePath = self.api.get_page(Page.VERSION)
         try:
-            async with async_timeout.timeout(TIMEOUT):
+            async with asyncio.timeout(TIMEOUT):
                 _LOGGER.debug(f"Guess {self.url + versionPagePath}")
                 response = await self.session.get(
                     self.url + versionPagePath, headers={}
                 )
             if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text('latin1')}")
+                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
                 # Looks like it's a model supporting the Protexial API
                 self.api_type = ApiType.PROTEXIAL
                 return self.api_type
@@ -242,11 +247,11 @@ class SomfyProtexial:
         # Maybe this is an older version without the locale in the path
         errorPagePath = self.api.get_page(Page.ERROR)
         try:
-            async with async_timeout.timeout(TIMEOUT):
+            async with asyncio.timeout(TIMEOUT):
                 _LOGGER.debug(f"Guess {self.url + errorPagePath}")
                 response = await self.session.get(self.url + errorPagePath, headers={})
             if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text('latin1')}")
+                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
                 self.api_type = ApiType.PROTEXIOM
                 return self.api_type
             _LOGGER.error(
@@ -278,7 +283,7 @@ class SomfyProtexial:
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
-        dom = pq(await login_response.text("latin1"))
+        dom = pq(await login_response.text("windows-1252"))
         challenge_element = dom(Selector.CHALLENGE_ELEMENT)
         if challenge_element:
             return challenge_element.text()
@@ -309,7 +314,7 @@ class SomfyProtexial:
         status_response = await self.__do_call(
             "get", Page.STATUS, login=False, authenticated=False
         )
-        content = await status_response.text("latin1")
+        content = await status_response.text("windows-1252")
         response = ET.fromstring(content)
         status = Status()
         for child in response:
@@ -343,7 +348,7 @@ class SomfyProtexial:
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
         status_response = await self.__do_call("get", Page.PRINT, login=False)
-        dom = pq(await status_response.text("latin1"))
+        dom = pq(await status_response.text("windows-1252"))
         all_challenge_elements = dom(Selector.CHALLENGE_ELEMENT_LIST)
         challenges = {}
         chars = ["A", "B", "C", "D", "E", "F"]
@@ -382,7 +387,7 @@ class SomfyProtexial:
     async def close_cover(self):
         form = self.api.get_close_cover_payload()
         response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text("latin1"))
+        print(await response.text("windows-1252"))
 
     async def stop_cover(self):
         form = self.api.get_stop_cover_payload()
@@ -431,7 +436,7 @@ class ProtexialApi:
         return {"hidden": "hidden", btnZone: "Marche"}
 
     def get_disarm_payload(self):
-        return {"hidden": "hidden", "btn_zone_off_ABC": "Arret"}
+        return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
 
     def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "btn_lum_on": "ON"}
@@ -491,8 +496,7 @@ class ProtexiomApi:
         return {"hidden": "hidden", "zone": value}
 
     def get_disarm_payload(self):
-        # Return an already urlencoded payload as the default encoding is not accepted
-        return "hidden=hidden&zone=Arr%EAt+A+B+C"
+        return {"hidden": "hidden", "zone": "Arrêt A B C"}
 
     def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "action_lum": "ON"}
