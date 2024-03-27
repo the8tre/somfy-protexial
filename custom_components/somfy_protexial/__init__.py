@@ -54,6 +54,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data.setdefault(DOMAIN, {})
 
     session = aiohttp_client.async_create_clientsession(hass)
+    _LOGGER.debug(f"CONF_URL:{entry.data.get(CONF_URL)}")
+    _LOGGER.debug(f"CONF_API_TYPE:{entry.data.get(CONF_API_TYPE)}")
+    _LOGGER.debug(f"CONF_USERNAME:{entry.data.get(CONF_USERNAME)}")
+    _LOGGER.debug(f"CONF_PASSWORD:{entry.data.get(CONF_PASSWORD)}")
+    _LOGGER.debug(f"CONF_CODES:{entry.data.get(CONF_CODES)}")
+
     protexial = SomfyProtexial(
         session=session,
         url=entry.data.get(CONF_URL),
@@ -62,6 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         password=entry.data.get(CONF_PASSWORD),
         codes=entry.data.get(CONF_CODES),
     )
+
     await protexial.init()
 
     async def _get_status():
