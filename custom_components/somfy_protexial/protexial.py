@@ -45,7 +45,7 @@ class Error(str, Enum):
     WRONG_CREDENTIALS = "(0x0812)"
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
-    UNKNOWN_PARAMETER = "(0x0A03)"
+    UNKNOWN_PARAMETER = "(0x1003)"
 
 
 class Zone(Enum):
