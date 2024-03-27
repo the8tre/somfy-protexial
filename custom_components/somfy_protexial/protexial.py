@@ -159,9 +159,11 @@ class SomfyProtexial:
                     elif errorCode == Error.WRONG_CODE:
                         raise Exception("Login failed: Wrong code")
                     elif errorCode == Error.UNKNOWN_PARAMETER:
-                        raise Exception("Login failed: Unknown parameter")
+                        raise Exception("Command failed: Unknown parameter")
                     else:
-                        raise Exception(f"Login failed: Unknown errorCode: {errorCode}")
+                        raise Exception(
+                            f"Command failed: Unknown errorCode: {errorCode}"
+                        )
                 else:
                     return response
             else:
@@ -489,7 +491,7 @@ class ProtexiomApi:
         return {"hidden": "hidden", "zone": value}
 
     def get_disarm_payload(self):
-        return {"hidden": "hidden", "zone": "Arrêt A B C"}
+        return {"hidden": "hidden", "zone": "Arr%EAt+A+B+C"}
 
     def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "action_lum": "ON"}
