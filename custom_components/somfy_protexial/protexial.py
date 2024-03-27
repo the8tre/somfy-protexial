@@ -491,7 +491,7 @@ class ProtexiomApi:
         return {"hidden": "hidden", "zone": value}
 
     def get_disarm_payload(self):
-        return {"hidden": "hidden", "zone": "Arr%EAt+A+B+C"}
+        return {"hidden": "hidden", "zone": "Arret"}
 
     def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "action_lum": "ON"}
