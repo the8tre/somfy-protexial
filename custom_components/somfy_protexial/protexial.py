@@ -491,7 +491,8 @@ class ProtexiomApi:
         return {"hidden": "hidden", "zone": value}
 
     def get_disarm_payload(self):
-        return {"hidden": "hidden", "zone": "Arret"}
+        # Return an already urlencoded payload as the default encoding is not accepted
+        return "hidden=hidden&zone=Arr%EAt+A+B+C"
 
     def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "action_lum": "ON"}
