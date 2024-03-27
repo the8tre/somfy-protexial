@@ -27,7 +27,14 @@ from homeassistant.helpers.selector import (
 )
 import voluptuous as vol
 
-from .const import CONF_ARM_CODE, CONF_CODE, CONF_CODES, CONF_MODES, DOMAIN
+from .const import (
+    CONF_API_TYPE,
+    CONF_ARM_CODE,
+    CONF_CODE,
+    CONF_CODES,
+    CONF_MODES,
+    DOMAIN,
+)
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,6 +42,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+    MINOR_VERSION = 2
 
     async def async_step_user(self, user_input):
         if self._async_current_entries():
@@ -47,6 +55,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             session = aiohttp_client.async_create_clientsession(self.hass)
             self.protexial = SomfyProtexial(session, self.url)
             try:
+                self.api_type = await self.protexial.guess_and_set_api_type()
                 challenge = await self.protexial.get_challenge()
                 return await self.async_step_login(None, challenge)
             except Exception as e:
@@ -113,6 +122,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     title=self.url,
                     data={
                         CONF_URL: self.url,
+                        CONF_API_TYPE: self.api_type,
                         CONF_USERNAME: self.username,
                         CONF_PASSWORD: self.password,
                         CONF_CODES: self.codes,

@@ -1,11 +1,13 @@
 import asyncio
 from enum import Enum
 import logging
+from urllib.parse import urlencode
 from xml.etree import ElementTree as ET
 
 from aiohttp import ClientError, ClientSession
-import async_timeout
 from pyquery import PyQuery as pq
+
+from .const import ApiType, Page
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -31,18 +33,6 @@ class Status:
         return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
 
 
-class Page(str, Enum):
-    LOGIN = "/fr/login.htm"
-    LOGOUT = "/logout.htm"
-    PILOTAGE = "/fr/u_pilotage.htm"
-    STATUS = "/status.xml"
-    ERROR = "/fr/error.htm"
-    ELEMENTS = "/fr/u_plistelmt.htm"
-    PRINT = "/fr/u_print.htm"
-    VERSION = "/cfg/vers"
-    DEFAULT = "/default.htm"
-
-
 class Selector(str, Enum):
     CHALLENGE_ELEMENT = "#form_id table tr:nth-child(4) td:nth-child(1) b"
     ERROR_ELEMENT = "#infobox b"
@@ -55,6 +45,7 @@ class Error(str, Enum):
     WRONG_CREDENTIALS = "(0x0812)"
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
+    UNKNOWN_PARAMETER = "(0x1003)"
 
 
 class Zone(Enum):
@@ -69,40 +60,73 @@ TIMEOUT = 10
 
 class SomfyProtexial:
     def __init__(
-        self, session: ClientSession, url, username=None, password=None, codes=None
-    ):
+        self,
+        session: ClientSession,
+        url,
+        api_type=None,
+        username=None,
+        password=None,
+        codes=None,
+    ) -> None:
         self.url = url
+        self.api_type = api_type
         self.username = username
         self.password = password
         self.codes = codes
         self.session = session
         self.cookie = None
+        if self.api_type == ApiType.PROTEXIAL:
+            self.api = ProtexialApi()
+        else:
+            self.api = ProtexiomApi()
 
     async def __do_call(
-        self, method, path, headers={}, data=None, retry=True, login=True
+        self,
+        method,
+        page,
+        headers=None,
+        data=None,
+        retry=True,
+        login=True,
+        authenticated=True,
     ):
+        if headers is None:
+            headers = {}
+
         try:
-            if self.cookie:
+            path = self.api.get_page(page)
+            full_path = self.url + path
+            if self.cookie and authenticated:
                 headers["Cookie"] = self.cookie
             if data:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-            async with async_timeout.timeout(TIMEOUT):
+            async with asyncio.timeout(TIMEOUT):
+                _LOGGER.debug(f"Call to: {full_path}")
                 if method == "get":
-                    response = await self.session.get(self.url + path, headers=headers)
+                    response = await self.session.get(full_path, headers=headers)
                 elif method == "post":
+                    encodedData = urlencode(data, encoding="windows-1252")
+                    _LOGGER.debug(f"With payload: {data}")
+                    _LOGGER.debug(f"With payload (encoded): {encodedData}")
                     response = await self.session.post(
-                        self.url + path, data=data, headers=headers
+                        self.url + path, data=encodedData, headers=headers
                     )
+            _LOGGER.debug(f"Response path: {response.real_url.path}")
+            _LOGGER.debug(f"Response headers: {response.headers}")
+            _LOGGER.debug(f"Response body: {await response.text('windows-1252')}")
 
             if response.status == 200:
-                if response.real_url.path == Page.DEFAULT and retry is True:
+                if (
+                    response.real_url.path == self.api.get_page(Page.DEFAULT)
+                    and retry is True
+                ):
                     await self.__login()
                     return await self.__do_call(
-                        method, path, headers, data, retry=False, login=False
+                        method, page, headers, data, retry=False, login=False
                     )
-                elif response.real_url.path == Page.ERROR:
-                    dom = pq(await response.text("latin1"))
+                elif response.real_url.path == self.api.get_page(Page.ERROR):
+                    dom = pq(await response.text("windows-1252"))
                     error_element = dom(Selector.ERROR_ELEMENT)
                     if not error_element:
                         raise Exception("Unknown error")
@@ -114,22 +138,22 @@ class SomfyProtexial:
                     ):
                         await self.__login()
                         return await self.__do_call(
-                            method, path, headers, data, retry=False, login=False
+                            method, page, headers, data, retry=False, login=False
                         )
                     elif errorCode == Error.SESSION_ALREADY_OPEN:
                         if retry:
-                            form = {"btn_ok": "OK"}
+                            form = self.api.get_reset_session_payload()
                             await self.__do_call(
                                 "post",
                                 Page.ERROR,
-                                form,
+                                data=form,
                                 retry=False,
                             )
                             self.cookie = None
                             if login:
                                 await self.__login()
                             return await self.__do_call(
-                                method, path, headers, data, retry=False, login=login
+                                method, page, headers, data, retry=False, login=login
                             )
                         else:
                             raise Exception("Too many login retries")
@@ -139,8 +163,12 @@ class SomfyProtexial:
                         raise Exception("Login failed: Max attempt count reached")
                     elif errorCode == Error.WRONG_CODE:
                         raise Exception("Login failed: Wrong code")
+                    elif errorCode == Error.UNKNOWN_PARAMETER:
+                        raise Exception("Command failed: Unknown parameter")
                     else:
-                        raise Exception("Login failed: Unknown error")
+                        raise Exception(
+                            f"Command failed: Unknown errorCode: {errorCode}"
+                        )
                 else:
                     return response
             else:
@@ -152,7 +180,7 @@ class SomfyProtexial:
                 exception,
             )
             raise Exception(
-                f"Timeout error fetching information from {path} - {exception}"
+                f"Timeout error fetching information from {full_path} - {exception}"
             )
 
         except ClientError as exception:
@@ -170,12 +198,92 @@ class SomfyProtexial:
         await self.__login()
 
     async def get_version(self):
-        response = await self.__do_call("get", Page.VERSION, login=False)
-        return await response.text("latin1")
+        if self.api.get_page(Page.VERSION) is not None:
+            response = await self.__do_call(
+                "get", Page.VERSION, login=False, authenticated=False
+            )
+            return await response.text("windows-1252")
+        else:
+            return "0.0"
+
+    async def guess_and_set_api_type(self):
+        self.api = ProtexialApi()
+        # Is is a Protexial centrale having a version page
+        versionPagePath = self.api.get_page(Page.VERSION)
+        try:
+            async with asyncio.timeout(TIMEOUT):
+                _LOGGER.debug(f"Guess {self.url + versionPagePath}")
+                response = await self.session.get(
+                    self.url + versionPagePath, headers={}
+                )
+            if response.status == 200:
+                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
+                # Looks like it's a model supporting the Protexial API
+                self.api_type = ApiType.PROTEXIAL
+                return self.api_type
+            # Looks like another model
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching information from %s - %s",
+                versionPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Timeout error fetching information from {versionPagePath} - {exception}"
+            )
+        except ClientError as exception:
+            _LOGGER.error(
+                "Error fetching information from %s - %s",
+                versionPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Error fetching information from {versionPagePath} - {exception}"
+            )
+        except Exception as exception:
+            _LOGGER.error("Something really wrong happened! - %s", exception)
+
+        self.api = ProtexiomApi()
+        # Maybe this is an older version without the locale in the path
+        errorPagePath = self.api.get_page(Page.ERROR)
+        try:
+            async with asyncio.timeout(TIMEOUT):
+                _LOGGER.debug(f"Guess {self.url + errorPagePath}")
+                response = await self.session.get(self.url + errorPagePath, headers={})
+            if response.status == 200:
+                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
+                self.api_type = ApiType.PROTEXIOM
+                return self.api_type
+            _LOGGER.error(
+                "Didn't find the error page, doesn't look like a Somfy centrale"
+            )
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching information from %s - %s",
+                errorPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Timeout error fetching information from {errorPagePath} - {exception}"
+            )
+        except ClientError as exception:
+            _LOGGER.error(
+                "Error fetching information from %s - %s",
+                errorPagePath,
+                exception,
+            )
+            raise Exception(
+                f"Error fetching information from {errorPagePath} - {exception}"
+            )
+        except Exception as exception:
+            _LOGGER.error("Something really wrong happened! - %s", exception)
+        raise Exception(
+            "Didn't find the error page, doesn't look like a Somfy centrale"
+        )
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
-        dom = pq(await login_response.text("latin1"))
+        dom = pq(await login_response.text("windows-1252"))
         challenge_element = dom(Selector.CHALLENGE_ELEMENT)
         if challenge_element:
             return challenge_element.text()
@@ -188,12 +296,11 @@ class SomfyProtexial:
             challenge = await self.get_challenge()
             code = self.codes[challenge]
 
-        form = {
-            "login": username if username else self.username,
-            "password": password if password else self.password,
-            "key": code,
-            "btn_login": "Connexion",
-        }
+        form = self.api.get_login_payload(
+            username if username else self.username,
+            password if password else self.password,
+            code,
+        )
         login_response = await self.__do_call(
             "post", Page.LOGIN, data=form, retry=False, login=False
         )
@@ -204,8 +311,10 @@ class SomfyProtexial:
         self.cookie = None
 
     async def get_status(self):
-        status_response = await self.__do_call("get", Page.STATUS)
-        content = await status_response.text("latin1")
+        status_response = await self.__do_call(
+            "get", Page.STATUS, login=False, authenticated=False
+        )
+        content = await status_response.text("windows-1252")
         response = ET.fromstring(content)
         status = Status()
         for child in response:
@@ -239,7 +348,7 @@ class SomfyProtexial:
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
         status_response = await self.__do_call("get", Page.PRINT, login=False)
-        dom = pq(await status_response.text("latin1"))
+        dom = pq(await status_response.text("windows-1252"))
         all_challenge_elements = dom(Selector.CHALLENGE_ELEMENT_LIST)
         challenges = {}
         chars = ["A", "B", "C", "D", "E", "F"]
@@ -256,6 +365,63 @@ class SomfyProtexial:
         return challenges
 
     async def arm(self, zone):
+        form = self.api.get_arm_payload(zone)
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def disarm(self):
+        form = self.api.get_disarm_payload()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def turn_light_on(self):
+        form = self.api.get_turn_light_on_payload()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def turn_light_off(self):
+        form = self.api.get_turn_light_off_payload()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def open_cover(self):
+        form = self.api.get_open_cover_payload()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def close_cover(self):
+        form = self.api.get_close_cover_payload()
+        response = await self.__do_call("post", Page.PILOTAGE, data=form)
+        print(await response.text("windows-1252"))
+
+    async def stop_cover(self):
+        form = self.api.get_stop_cover_payload()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
+
+
+class ProtexialApi:
+    pages = {
+        Page.LOGIN: "/fr/login.htm",
+        Page.LOGOUT: "/logout.htm",
+        Page.PILOTAGE: "/fr/u_pilotage.htm",
+        Page.STATUS: "/status.xml",
+        Page.ERROR: "/fr/error.htm",
+        Page.ELEMENTS: "/fr/u_plistelmt.htm",
+        Page.PRINT: "/fr/u_print.htm",
+        Page.VERSION: "/cfg/vers",
+        Page.DEFAULT: "/default.htm",
+    }
+
+    def get_page(self, page: Page):
+        return self.pages[page]
+
+    def get_login_payload(self, username, password, code):
+        return {
+            "login": username,
+            "password": password,
+            "key": code,
+            "btn_login": "Connexion",
+        }
+
+    def get_reset_session_payload(self):
+        return {"btn_ok": "OK"}
+
+    def get_arm_payload(self, zone):
         btnZone = ""
         match zone:
             case Zone.A:
@@ -267,30 +433,82 @@ class SomfyProtexial:
             case Zone.ABC:
                 btnZone = "btn_zone_on_ABC"
 
-        form = {"hidden": "hidden", btnZone: "Marche"}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+        return {"hidden": "hidden", btnZone: "Marche"}
 
-    async def disarm(self):
-        form = {"hidden": "hidden", "btn_zone_off_ABC": "Arret"}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+    def get_disarm_payload(self):
+        return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
 
-    async def turn_light_on(self):
-        form = {"hidden": "hidden", "btn_lum_on": "ON"}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+    def get_turn_light_on_payload(self):
+        return {"hidden": "hidden", "btn_lum_on": "ON"}
 
-    async def turn_light_off(self):
-        form = {"hidden": "hidden", "btn_lum_off": "OFF"}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+    def get_turn_light_off_payload(self):
+        return {"hidden": "hidden", "btn_lum_off": "OFF"}
 
-    async def open_cover(self):
-        form = {"hidden": "hidden", "btn_vol_up": ""}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+    def get_open_cover_payload(self):
+        return {"hidden": "hidden", "btn_vol_up": ""}
 
-    async def close_cover(self):
-        form = {"hidden": "hidden", "btn_vol_down": ""}
-        response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text("latin1"))
+    def get_close_cover_payload(self):
+        return {"hidden": "hidden", "btn_vol_down": ""}
 
-    async def stop_cover(self):
-        form = {"hidden": "hidden", "btn_vol_stop": ""}
-        await self.__do_call("post", Page.PILOTAGE, data=form)
+    def get_stop_cover_payload(self):
+        return {"hidden": "hidden", "btn_vol_stop": ""}
+
+
+class ProtexiomApi:
+    pages = {
+        Page.LOGIN: "/login.htm",
+        Page.LOGOUT: "/logout.htm",
+        Page.PILOTAGE: "/u_pilotage.htm",
+        Page.STATUS: "/status.xml",
+        Page.ERROR: "/error.htm",
+        Page.ELEMENTS: "/u_plistelmt.htm",
+        Page.PRINT: "/u_print.htm",
+        Page.VERSION: None,
+        Page.DEFAULT: "/default.htm",
+    }
+
+    def get_page(self, page: Page):
+        return self.pages[page]
+
+    def get_login_payload(self, username, password, code):
+        return {
+            "login": username,
+            "password": password,
+            "key": code,
+            "action": "Connexion",
+        }
+
+    def get_reset_session_payload(self):
+        return {"action": "OK"}
+
+    def get_arm_payload(self, zone):
+        value = ""
+        match zone:
+            case Zone.A:
+                value = "Marche A"
+            case Zone.B:
+                value = "Marche B"
+            case Zone.C:
+                value = "Marche C"
+            case Zone.ABC:
+                value = "Marche A B C"
+
+        return {"hidden": "hidden", "zone": value}
+
+    def get_disarm_payload(self):
+        return {"hidden": "hidden", "zone": "Arrêt A B C"}
+
+    def get_turn_light_on_payload(self):
+        return {"hidden": "hidden", "action_lum": "ON"}
+
+    def get_turn_light_off_payload(self):
+        return {"hidden": "hidden", "action_lum": "OFF"}
+
+    def get_open_cover_payload(self):
+        return {"hidden": "hidden", "action_vol_montee": ""}
+
+    def get_close_cover_payload(self):
+        return {"hidden": "hidden", "action_vol_descente": ""}
+
+    def get_stop_cover_payload(self):
+        return {"hidden": "hidden", "action_vol_stop": ""}
