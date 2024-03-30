@@ -96,7 +96,10 @@ Il est tout à fait possible que cette intégration soit compatible avec d'autre
 | Protexiom      | `2008`         | :white_check_mark: |
 | Protexiom      | `v?*?`         | :grey_question:    |
 
-Pour connaître la version de votre centrale: http://192.168.1.234/cfg/vers
+L'année de l'interface de votre centrale apparait en bas des pages:</br>
+<img src="assets/version.png"  width="40%">
+
+Certaines centrales fournisse leur version via cette url: http://192.168.1.234/cfg/vers
 
 ### Utilisation de l'interface web d'origine
 
