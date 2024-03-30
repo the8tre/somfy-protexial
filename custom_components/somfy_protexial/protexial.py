@@ -1,6 +1,7 @@
 import asyncio
 from enum import Enum
 import logging
+import re
 from urllib.parse import urlencode
 from xml.etree import ElementTree as ET
 
@@ -34,9 +35,11 @@ class Status:
 
 
 class Selector(str, Enum):
+    CONTENT_TYPE = "meta[http-equiv='content-type']"
     CHALLENGE_ELEMENT = "#form_id table tr:nth-child(4) td:nth-child(1) b"
     ERROR_ELEMENT = "#infobox b"
     CHALLENGE_ELEMENT_LIST = "td:not([class])"
+    FOOTER_ELEMENT = "[id^='menu_footer']"
 
 
 class Error(str, Enum):
@@ -56,6 +59,8 @@ class Zone(Enum):
 
 
 TIMEOUT = 10
+
+ENCODING = "iso-8859-15"
 
 
 class SomfyProtexial:
@@ -106,7 +111,7 @@ class SomfyProtexial:
                 if method == "get":
                     response = await self.session.get(full_path, headers=headers)
                 elif method == "post":
-                    encodedData = urlencode(data, encoding="windows-1252")
+                    encodedData = urlencode(data, encoding=ENCODING)
                     _LOGGER.debug(f"With payload: {data}")
                     _LOGGER.debug(f"With payload (encoded): {encodedData}")
                     response = await self.session.post(
@@ -114,7 +119,7 @@ class SomfyProtexial:
                     )
             _LOGGER.debug(f"Response path: {response.real_url.path}")
             _LOGGER.debug(f"Response headers: {response.headers}")
-            _LOGGER.debug(f"Response body: {await response.text('windows-1252')}")
+            _LOGGER.debug(f"Response body: {await response.text(ENCODING)}")
 
             if response.status == 200:
                 if (
@@ -126,7 +131,7 @@ class SomfyProtexial:
                         method, page, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == self.api.get_page(Page.ERROR):
-                    dom = pq(await response.text("windows-1252"))
+                    dom = pq(await response.text(ENCODING))
                     error_element = dom(Selector.ERROR_ELEMENT)
                     if not error_element:
                         raise Exception("Unknown error")
@@ -198,13 +203,29 @@ class SomfyProtexial:
         await self.__login()
 
     async def get_version(self):
-        if self.api.get_page(Page.VERSION) is not None:
-            response = await self.__do_call(
-                "get", Page.VERSION, login=False, authenticated=False
+        version_string = "Unknown"
+        try:
+            error_response = await self.__do_call(
+                "get", Page.LOGIN, login=False, authenticated=False
             )
-            return await response.text("windows-1252")
-        else:
-            return "0.0"
+            dom = pq(await error_response.text(ENCODING))
+            footer_element = dom(Selector.FOOTER_ELEMENT)
+            if footer_element is not None:
+                matches = re.search(
+                    r"([0-9]{4}) somfy", footer_element.text(), re.IGNORECASE
+                )
+                if len(matches.groups()) > 0:
+                    version_string = matches.group(1)
+
+            if self.api.get_page(Page.VERSION) is not None:
+                response = await self.__do_call(
+                    "get", Page.VERSION, login=False, authenticated=False
+                )
+                version = await response.text(ENCODING)
+                version_string += f" ({version.strip()})"
+        except Exception as exception:
+            _LOGGER.error("Failed to extract version: %s", exception)
+        return version_string
 
     async def guess_and_set_api_type(self):
         self.api = ProtexialApi()
@@ -217,7 +238,7 @@ class SomfyProtexial:
                     self.url + versionPagePath, headers={}
                 )
             if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
+                _LOGGER.debug(f"Guess response: {await response.text(ENCODING)}")
                 # Looks like it's a model supporting the Protexial API
                 self.api_type = ApiType.PROTEXIAL
                 return self.api_type
@@ -251,7 +272,7 @@ class SomfyProtexial:
                 _LOGGER.debug(f"Guess {self.url + errorPagePath}")
                 response = await self.session.get(self.url + errorPagePath, headers={})
             if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text('windows-1252')}")
+                _LOGGER.debug(f"Guess response: {await response.text(ENCODING)}")
                 self.api_type = ApiType.PROTEXIOM
                 return self.api_type
             _LOGGER.error(
@@ -283,7 +304,7 @@ class SomfyProtexial:
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
-        dom = pq(await login_response.text("windows-1252"))
+        dom = pq(await login_response.text(ENCODING))
         challenge_element = dom(Selector.CHALLENGE_ELEMENT)
         if challenge_element:
             return challenge_element.text()
@@ -314,7 +335,7 @@ class SomfyProtexial:
         status_response = await self.__do_call(
             "get", Page.STATUS, login=False, authenticated=False
         )
-        content = await status_response.text("windows-1252")
+        content = await status_response.text(ENCODING)
         response = ET.fromstring(content)
         status = Status()
         for child in response:
@@ -348,7 +369,7 @@ class SomfyProtexial:
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
         status_response = await self.__do_call("get", Page.PRINT, login=False)
-        dom = pq(await status_response.text("windows-1252"))
+        dom = pq(await status_response.text(ENCODING))
         all_challenge_elements = dom(Selector.CHALLENGE_ELEMENT_LIST)
         challenges = {}
         chars = ["A", "B", "C", "D", "E", "F"]
@@ -387,7 +408,7 @@ class SomfyProtexial:
     async def close_cover(self):
         form = self.api.get_close_cover_payload()
         response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text("windows-1252"))
+        print(await response.text(ENCODING))
 
     async def stop_cover(self):
         form = self.api.get_stop_cover_payload()
