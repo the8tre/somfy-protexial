@@ -1,4 +1,4 @@
-# Somfy Protexial
+# Somfy Protexial / Protexiom
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
@@ -10,7 +10,7 @@
 
 ## À propos
 
-Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial et permet le pilotage:
+Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial ou Protexiom et permet le pilotage:
 
 - de l'alarme par zones (A+B+C, A+B, A)
 - des volets roulants
@@ -84,7 +84,7 @@ Il est tout à fait possible que cette intégration soit compatible avec d'autre
 L'année de l'interface de votre centrale apparait en bas des pages:</br>
 ![version](assets/version.png)
 
-Certaines centrales fournisse leur version via cette url: http://192.168.1.234/cfg/vers
+Certaines centrales fournissent leur version via cette url: http://192.168.1.234/cfg/vers
 
 ### Utilisation de l'interface web d'origine
 
