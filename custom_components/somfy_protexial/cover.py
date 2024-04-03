@@ -30,7 +30,7 @@ async def async_setup_entry(
 
 
 class ProtexialCover(CoverEntity):
-    def __init__(self, device_info, api: SomfyProtexial):
+    def __init__(self, device_info, api: SomfyProtexial) -> None:
         super().__init__()
         self._attr_unique_id = f"{DOMAIN}_control_cover"
         self._attr_device_info = device_info

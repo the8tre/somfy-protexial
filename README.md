@@ -1,4 +1,4 @@
-# Somfy Protexial / Protexiom
+# Somfy Protexial / Protexiom / Protexial IO
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
@@ -10,7 +10,7 @@
 
 ## À propos
 
-Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial ou Protexiom et permet le pilotage:
+Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial, Protexiom ou Protexial IO et permet le pilotage:
 
 - de l'alarme par zones (A+B+C, A+B, A)
 - des volets roulants
@@ -89,12 +89,13 @@ Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défau
 ### Compatibilité de version
 
 Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
-| Modèle         | Version        | Statut             |
-| -------------- | -------------- | ------------------ |
-| Protexial      | `2010 (v8_1)`  | :white_check_mark: |
-| Protexiom 5000 | `2013 (v10_3)` | :white_check_mark: |
-| Protexiom      | `2008`         | :white_check_mark: |
-| Protexiom      | `v?*?`         | :grey_question:    |
+| Modèle         | Version         | Statut             |
+| -------------- | --------------- | ------------------ |
+| Protexial IO   | `2013 (v10_13)` | :white_check_mark: |
+| Protexiom 5000 | `2013 (v10_3)`  | :white_check_mark: |
+| Protexial      | `2010 (v8_1)`   | :white_check_mark: |
+| Protexiom      | `2008`          | :white_check_mark: |
+| Protexiom      | `v?*?`          | :grey_question:    |
 
 L'année de l'interface de votre centrale apparait en bas des pages:</br>
 <img src="assets/version.png"  width="40%">

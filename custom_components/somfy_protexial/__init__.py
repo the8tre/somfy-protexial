@@ -38,9 +38,9 @@ SCAN_INTERVAL = timedelta(seconds=20)
 
 PLATFORMS = [
     Platform.ALARM_CONTROL_PANEL,
+    Platform.BINARY_SENSOR,
     Platform.COVER,
     Platform.LIGHT,
-    Platform.BINARY_SENSOR,
 ]
 
 

@@ -17,8 +17,15 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import API, CONF_ARM_CODE, CONF_MODES, COORDINATOR, DEVICE_INFO, DOMAIN
-from .protexial import Zone
+from .const import (
+    API,
+    CONF_ARM_CODE,
+    CONF_MODES,
+    COORDINATOR,
+    DEVICE_INFO,
+    DOMAIN,
+    Zone,
+)
 
 DEFAULT_ALARM_NAME = "Alarme"
 ACTIVATION_ALARM_CODE = None
@@ -43,7 +50,7 @@ async def async_setup_entry(
 
 
 class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
-    def __init__(self, device_info, coordinator, api, modes, arm_code):
+    def __init__(self, device_info, coordinator, api, modes, arm_code) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_control_alarm"
         self._attr_device_info = device_info

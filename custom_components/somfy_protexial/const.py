@@ -16,9 +16,17 @@ COORDINATOR = "coordinator"
 DEVICE_INFO = "device_info"
 
 
+class Zone(Enum):
+    A = 0
+    B = 1
+    C = 2
+    ABC = 3
+
+
 class ApiType(str, Enum):
     PROTEXIAL = "protexial"
     PROTEXIOM = "protexiom"
+    PROTEXIAL_IO = "protexial_io"
 
 
 class Page(str, Enum):
@@ -28,9 +36,17 @@ class Page(str, Enum):
     STATUS = "status"
     ERROR = "error"
     ELEMENTS = "elements"
-    PRINT = "print"
+    CHALLENGE_CARD = "challenge_card"
     VERSION = "version"
     DEFAULT = "default"
+
+
+class Selector(str, Enum):
+    CONTENT_TYPE = "content_type"
+    LOGIN_CHALLENGE = "login_challenge"
+    ERROR_CODE = "error_code"
+    FOOTER = "footer"
+    CHALLENGE_CARD = "challenge_card"
 
 
 BINARY_SENSORS = [
