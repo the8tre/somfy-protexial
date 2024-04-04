@@ -85,8 +85,7 @@ Interval de rafraîchissement: de 15 secondes à 1 heure, 60 secondes par défau
 
 La liste visible en haut de cette page n'est pas exhaustive, il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy. N'hésitez pas à m'en faire part si c'est le cas !
 
-Un fil de discussion à ce sujet est disponible ici: 
-[HACF - Intégration Custom: Centrale Somfy Protexial](https://forum.hacf.fr/t/integration-custom-centrale-somfy-protexial/23589/1)
+Un fil de discussion à ce sujet est disponible ici: [HACF - Intégration Custom: Centrale Somfy Protexial](https://forum.hacf.fr/t/integration-custom-centrale-somfy-protexial/23589/1)
 
 L'année de l'interface de votre centrale apparait en bas des pages:</br>
 ![version](assets/version.png)
