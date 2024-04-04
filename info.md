@@ -10,7 +10,17 @@
 
 ## À propos
 
-Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial, Protexiom ou Protexial IO et permet le pilotage:
+Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial, Protexiom ou Protexial IO
+
+Modèles testés:
+| Modèle         | Version         | Statut             |
+| -------------- | --------------- | ------------------ |
+| Protexial IO   | `2013 (v10_13)` | :white_check_mark: |
+| Protexiom 5000 | `2013 (v10_3)`  | :white_check_mark: |
+| Protexial      | `2010 (v8_1)`   | :white_check_mark: |
+| Protexiom      | `2008`          | :white_check_mark: |
+
+L'intégration permet le pilotage:
 
 - de l'alarme par zones (A+B+C, A+B, A)
 - des volets roulants
@@ -46,7 +56,7 @@ Les entités suivantes sont gérées:
 ### 1. Adresse de la centrale
 
 - Saisisser l'URL de l'interface web locale de votre centrale: `http://192.168.1.234`
-  ![welcome](assets/welcome.png)
+![welcome](assets/welcome.png)  ![login_io](assets/login_io.jpeg)
 
 
 ### 2. Identifiants de l'utilisateur
@@ -58,7 +68,7 @@ Les entités suivantes sont gérées:
 
 ### 3. Configuration additionelle
 
-Les différents modes d'armement exploitent les zones définies par la cofiguration de la centrale Somfy:
+Les différents modes d'armement exploitent les zones définies par la configuration de la centrale Somfy:
 
 - Armement en absence (toujours configuré): Zones A+B+C
 - Armement pour la nuit (optionnel): Zones A+B
@@ -66,21 +76,17 @@ Les différents modes d'armement exploitent les zones définies par la cofigurat
 
 Code d'armement: Si vous spécifiez un code celui-ci sera demandé lors de l'armement/désarmement.
 
-Interval de rafraîchissement: de 15 secondes à 1 heure, 20 secondes par défaut.
+Interval de rafraîchissement: de 15 secondes à 1 heure, 60 secondes par défaut.
 ![step3](assets/step3.png)
 
 ## À noter
 
 ### Compatibilité de version
 
-Il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy telle que Protexiom. N'hésitez pas à m'en faire part si c'est le cas !
-| Modèle         | Version         | Statut             |
-| -------------- | --------------- | ------------------ |
-| Protexial IO   | `2013 (v10_13)` | :white_check_mark: |
-| Protexiom 5000 | `2013 (v10_3)`  | :white_check_mark: |
-| Protexial      | `2010 (v8_1)`   | :white_check_mark: |
-| Protexiom      | `2008`          | :white_check_mark: |
-| Protexiom      | `v?*?`          | :grey_question:    |
+La liste visible en haut de cette page n'est pas exhaustive, il est tout à fait possible que cette intégration soit compatible avec d'autres version de centrale Somfy. N'hésitez pas à m'en faire part si c'est le cas !
+
+Un fil de discussion à ce sujet est disponible ici: 
+[HACF - Intégration Custom: Centrale Somfy Protexial](https://forum.hacf.fr/t/integration-custom-centrale-somfy-protexial/23589/1)
 
 L'année de l'interface de votre centrale apparait en bas des pages:</br>
 ![version](assets/version.png)
