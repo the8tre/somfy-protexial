@@ -15,12 +15,26 @@ API = "api"
 COORDINATOR = "coordinator"
 DEVICE_INFO = "device_info"
 
+CHALLENGE_REGEX = r"[A-F]{1}[1-5]{1}"
+
 
 class Zone(Enum):
     A = 0
     B = 1
     C = 2
     ABC = 3
+
+
+HTTP_TIMEOUT = 10
+
+
+class SomfyError(str, Enum):
+    WRONG_CODE = "(0x0B00)"
+    MAX_LOGIN_ATTEMPS = "(0x0904)"
+    WRONG_CREDENTIALS = "(0x0812)"
+    SESSION_ALREADY_OPEN = "(0x0902)"
+    NOT_AUTHORIZED = "(0x0903)"
+    UNKNOWN_PARAMETER = "(0x1003)"
 
 
 class ApiType(str, Enum):
