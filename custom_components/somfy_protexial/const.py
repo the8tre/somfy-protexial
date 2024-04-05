@@ -10,10 +10,32 @@ CONF_CODE = "code"
 CONF_CODES = "codes"
 CONF_MODES = "modes"
 CONF_ARM_CODE = "arm_code"
+CONF_NIGHT_ZONES = "night_zones"
+CONF_HOME_ZONES = "home_zones"
 
 API = "api"
 COORDINATOR = "coordinator"
 DEVICE_INFO = "device_info"
+
+
+class Zone(Enum):
+    A = 0
+    B = 1
+    C = 2
+    ABC = 3
+
+
+class Zones(str, Enum):
+    NONE = "none"
+    AB = "ab"
+    AC = "ac"
+    BC = "bc"
+    A = "a"
+    B = "b"
+    C = "c"
+
+
+ALL_ZONES = [Zones.NONE, Zones.AB, Zones.BC, Zones.AC, Zones.A, Zones.B, Zones.C]
 
 
 class ApiType(str, Enum):

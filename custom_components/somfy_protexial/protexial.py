@@ -8,7 +8,7 @@ from xml.etree import ElementTree as ET
 from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
-from .const import ApiType, Page
+from .const import ApiType, Page, Zone
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -49,13 +49,6 @@ class Error(str, Enum):
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
     UNKNOWN_PARAMETER = "(0x1003)"
-
-
-class Zone(Enum):
-    A = 0
-    B = 1
-    C = 2
-    ABC = 3
 
 
 TIMEOUT = 10

@@ -16,33 +16,48 @@
         }
       },
       "config": {
-        "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
+        "description": "Choisissez d'autres modes optionnels d'armement en plus de 'Armer en absence (Zones A+B+C)'",
         "data": {
-          "armed_away": "Armer en absence (Zones A+B+C)",
-          "armed_night": "Armer pour la nuit (Zones A+B)",
-          "armed_home": "Armer en présence (Zone A seulement)",
+          "night_zones": "Zone(s) Nuit",
+          "home_zones": "Zone(s) en présence",
           "arm_code": "Code d'armement à 4 chiffres optionnel",
-          "scan_interval": "Interval de rafraîchissement (seconds)"
+          "scan_interval": "Interval de rafraîchissement (secondes)"
         }
       }
     },
     "error": {
       "auth": "Nom d'utilisateur/Mot de passe/Code Erroné.",
       "connection": "Impossible de joindre le serveur.",
-      "arm_code": "Le code d'armement doit comporter 4 chiffres."
+      "arm_code": "Le code d'armement doit comporter 4 chiffres.",
+      "same_zones": "Les zones choisies pour armement de nuit en en absence doivent être différents."
     }
   },
   "options": {
     "step": {
       "init": {
-        "description": "Choisissez d'autres modes d'armement en plus de 'Armer en absence (Zones A+B+C)'",
+        "description": "Choisissez d'autres modes optionnels d'armement en plus de 'Armer en absence (Zones A+B+C)'",
         "data": {
-          "armed_away": "Armer en absence (Zones A+B+C)",
-          "armed_night": "Armer pour la nuit (Zones A+B)",
-          "armed_home": "Armer en présence (Zone A seulement)",
+          "night_zones": "Zone(s) Nuit",
+          "home_zones": "Zone(s) en présence",
           "arm_code": "Code d'armement à 4 chiffres optionnel",
-          "scan_interval": "Interval de rafraîchissement (seconds)"
+          "scan_interval": "Interval de rafraîchissement (secondes)"
         }
+      }
+    },
+    "error": {
+      "arm_code": "Le code d'armement doit comporter 4 chiffres.",
+      "same_zones": "Les zones choisies pour armement de nuit et en absence doivent être différents."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "ab": "A + B",
+        "bc": "B + C",
+        "ac": "A + C",
+        "a": "A",
+        "b": "B",
+        "c": "C"
       }
     }
   }
