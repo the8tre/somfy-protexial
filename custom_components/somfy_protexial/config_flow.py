@@ -188,6 +188,7 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
 
                 newData = {
                     CONF_URL: self.config_entry.data[CONF_URL],
+                    CONF_API_TYPE: self.config_entry.data[CONF_API_TYPE],
                     CONF_USERNAME: self.config_entry.data[CONF_USERNAME],
                     CONF_PASSWORD: self.config_entry.data[CONF_PASSWORD],
                     CONF_CODES: self.config_entry.data[CONF_CODES],
