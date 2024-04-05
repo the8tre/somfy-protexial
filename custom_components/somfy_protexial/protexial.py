@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum
 import logging
 import re
 from urllib.parse import urlencode
