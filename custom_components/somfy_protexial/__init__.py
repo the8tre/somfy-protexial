@@ -9,13 +9,14 @@ from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_SW_VERSION,
+    ATTR_ENTITY_ID,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
     CONF_USERNAME,
     Platform,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import aiohttp_client, device_registry as dr
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.entity import DeviceInfo
@@ -124,6 +125,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     )
+    await hass.async_add_executor_job(setup_hass_services, hass, protexial)
 
     return True
 
@@ -188,3 +190,20 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle an options update."""
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+def setup_hass_services(hass: HomeAssistant, protexial) -> None:
+    """Home Assistant services."""
+
+    async def reset_battery_status(call: ServiceCall) -> None:
+        await protexial.reset_battery_status()
+
+    async def reset_link_status(call: ServiceCall) -> None:
+        await protexial.reset_link_status()
+
+    async def reset_alarm_status(call: ServiceCall) -> None:
+        await protexial.reset_alarm_status()
+
+    hass.services.register(DOMAIN, "reset_battery_status", reset_battery_status)
+    hass.services.register(DOMAIN, "reset_link_status", reset_link_status)
+    hass.services.register(DOMAIN, "reset_alarm_status", reset_alarm_status)

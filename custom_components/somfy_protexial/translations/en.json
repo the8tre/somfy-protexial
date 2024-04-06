@@ -62,5 +62,19 @@
         "5": "A + C"
       }
     }
+  },
+  "services": {
+    "reset_battery_status": {
+      "description": "Resets the aggregated battery status to OK.",
+      "name": "Delete battery faults"
+    },
+    "reset_link_status": {
+      "description": "Resets the aggregated link status to OK.",
+      "name": "Delete radio link lost faults"
+    },
+    "reset_alarm_status": {
+      "description": "Resets the aggregated alarm status to OK.",
+      "name": "Delete alarm faults"
+    }
   }
 }

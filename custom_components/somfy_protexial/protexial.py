@@ -120,7 +120,7 @@ class SomfyProtexial:
                         )
                     elif errorCode == SomfyError.SESSION_ALREADY_OPEN:
                         if retry:
-                            form = self.api.get_reset_session_payload()
+                            form = self.api.reset_session()
                             await self.__do_call(
                                 "post",
                                 Page.ERROR,
@@ -297,7 +297,7 @@ class SomfyProtexial:
             challenge = await self.get_challenge()
             code = self.codes[challenge]
 
-        form = self.api.get_login_payload(
+        form = self.api.login(
             username if username else self.username,
             password if password else self.password,
             code,
@@ -366,30 +366,41 @@ class SomfyProtexial:
         return challenges
 
     async def arm(self, zone):
-        form = self.api.get_arm_payload(zone)
+        form = self.api.arm(zone)
         await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def disarm(self):
-        form = self.api.get_disarm_payload()
+        form = self.api.disarm()
         await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def turn_light_on(self):
-        form = self.api.get_turn_light_on_payload()
+        form = self.api.turn_light_on()
         await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def turn_light_off(self):
-        form = self.api.get_turn_light_off_payload()
+        form = self.api.turn_light_off()
         await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def open_cover(self):
-        form = self.api.get_open_cover_payload()
+        form = self.api.open_cover()
         await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def close_cover(self):
-        form = self.api.get_close_cover_payload()
-        response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text(self.api.get_encoding()))
+        form = self.api.close_cover()
+        await self.__do_call("post", Page.PILOTAGE, data=form)
 
     async def stop_cover(self):
-        form = self.api.get_stop_cover_payload()
+        form = self.api.stop_cover()
         await self.__do_call("post", Page.PILOTAGE, data=form)
+
+    async def reset_battery_status(self):
+        form = self.api.reset_battery_status()
+        await self.__do_call("post", Page.ELEMENTS, data=form)
+
+    async def reset_link_status(self):
+        form = self.api.reset_link_status()
+        await self.__do_call("post", Page.ELEMENTS, data=form)
+    
+    async def reset_alarm_status(self):
+        form = self.api.reset_alarm_status()
+        await self.__do_call("post", Page.ELEMENTS, data=form)

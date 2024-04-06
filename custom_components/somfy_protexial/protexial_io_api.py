@@ -10,7 +10,7 @@ class ProtexialIOApi(AbstractApi):
             Page.PILOTAGE: "/fr/u_pilotage.htm",
             Page.STATUS: "/status.xml",
             Page.ERROR: "/fr/error.htm",
-            Page.ELEMENTS: "/fr/u_plistelmt.htm",
+            Page.ELEMENTS: "/fr/u_listelmt.htm",
             Page.CHALLENGE_CARD: "/fr/u_challenge.htm",
             Page.VERSION: "/cfg/vers",
             Page.DEFAULT: "/default.htm",
@@ -24,7 +24,7 @@ class ProtexialIOApi(AbstractApi):
         }
         self.encoding = "utf-8"
 
-    def get_login_payload(self, username, password, code):
+    def login(self, username, password, code):
         return {
             "login": username,
             "password": password,
@@ -32,10 +32,10 @@ class ProtexialIOApi(AbstractApi):
             "btn_login": "Se connecter",
         }
 
-    def get_reset_session_payload(self):
+    def reset_session(self):
         return {"btn_ok": "OK"}
 
-    def get_arm_payload(self, zone):
+    def arm(self, zone):
         match zone:
             case Zone.A:
                 return {"hidden": "hidden", "btn_zone_on_A": "Marche A"}
@@ -46,20 +46,29 @@ class ProtexialIOApi(AbstractApi):
             case Zone.ABC:
                 return {"hidden": "hidden", "btn_zone_on_ABC": "Marche A B C"}
 
-    def get_disarm_payload(self):
+    def disarm(self):
         return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
 
-    def get_turn_light_on_payload(self):
+    def turn_light_on(self):
         return {"hidden": "hidden", "btn_lum_on": "ON"}
 
-    def get_turn_light_off_payload(self):
+    def turn_light_off(self):
         return {"hidden": "hidden", "btn_lum_off": "OFF"}
 
-    def get_open_cover_payload(self):
+    def open_cover(self):
         return {"hidden": "hidden", "btn_vol_up": ""}
 
-    def get_close_cover_payload(self):
+    def close_cover(self):
         return {"hidden": "hidden", "btn_vol_down": ""}
 
-    def get_stop_cover_payload(self):
+    def stop_cover(self):
         return {"hidden": "hidden", "btn_vol_stop": "Stop"}
+
+    def reset_battery_status(self):
+        return {"btn_del_pil": "Piles"}
+
+    def reset_link_status(self):
+        return {"btn_del_lia": "Liaisons"}
+
+    def reset_alarm_status(self):
+        return {"btn_del_alm": "Alarmes"}

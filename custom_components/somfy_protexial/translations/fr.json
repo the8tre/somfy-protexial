@@ -61,5 +61,19 @@
         "5": "A + C"
       }
     }
+  },
+  "services": {
+    "reset_battery_status": {
+      "description": "Réinitialise le statut de batterie aggrégé à OK.",
+      "name": "Réinitialiser le statut de batterie"
+    },
+    "reset_link_status": {
+      "description": "Réinitialise le statut de lien radio aggrégé à OK.",
+      "name": "Réinitialiser le statut de lien radio"
+    },
+    "reset_alarm_status": {
+      "description": "Réinitialise le statut de l'alarme aggrégé à OK.",
+      "name": "Réinitialiser le statut de l'alarme"
+    }
   }
 }

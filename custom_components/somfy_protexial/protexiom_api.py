@@ -10,7 +10,7 @@ class ProtexiomApi(AbstractApi):
             Page.PILOTAGE: "/u_pilotage.htm",
             Page.STATUS: "/status.xml",
             Page.ERROR: "/error.htm",
-            Page.ELEMENTS: "/u_plistelmt.htm",
+            Page.ELEMENTS: "/u_listelmt.htm",
             Page.CHALLENGE_CARD: "/u_print.htm",
             Page.VERSION: None,
             Page.DEFAULT: "/default.htm",
@@ -24,7 +24,7 @@ class ProtexiomApi(AbstractApi):
         }
         self.encoding = "iso-8859-15"
 
-    def get_login_payload(self, username, password, code):
+    def login(self, username, password, code):
         return {
             "login": username,
             "password": password,
@@ -32,10 +32,10 @@ class ProtexiomApi(AbstractApi):
             "action": "Connexion",
         }
 
-    def get_reset_session_payload(self):
+    def reset_session(self):
         return {"action": "OK"}
 
-    def get_arm_payload(self, zone):
+    def arm(self, zone):
         value = ""
         match zone:
             case Zone.A:
@@ -49,20 +49,20 @@ class ProtexiomApi(AbstractApi):
 
         return {"hidden": "hidden", "zone": value}
 
-    def get_disarm_payload(self):
+    def disarm(self):
         return {"hidden": "hidden", "zone": "Arrêt A B C"}
 
-    def get_turn_light_on_payload(self):
+    def turn_light_on(self):
         return {"hidden": "hidden", "action_lum": "ON"}
 
-    def get_turn_light_off_payload(self):
+    def turn_light_off(self):
         return {"hidden": "hidden", "action_lum": "OFF"}
 
-    def get_open_cover_payload(self):
+    def open_cover(self):
         return {"hidden": "hidden", "action_vol_montee": ""}
 
-    def get_close_cover_payload(self):
+    def close_cover(self):
         return {"hidden": "hidden", "action_vol_descente": ""}
 
-    def get_stop_cover_payload(self):
+    def stop_cover(self):
         return {"hidden": "hidden", "action_vol_stop": ""}

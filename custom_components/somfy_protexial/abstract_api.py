@@ -18,37 +18,49 @@ class AbstractApi(ABC):
         return self.encoding
 
     @abstractmethod
-    def get_login_payload(self, username, password, code):
+    def login(self, username, password, code):
         pass
 
     @abstractmethod
-    def get_reset_session_payload(self):
+    def reset_session(self):
         pass
 
     @abstractmethod
-    def get_arm_payload(self, zone):
+    def arm(self, zone):
         pass
 
     @abstractmethod
-    def get_disarm_payload(self):
+    def disarm(self):
         pass
 
     @abstractmethod
-    def get_turn_light_on_payload(self):
+    def turn_light_on(self):
         pass
 
     @abstractmethod
-    def get_turn_light_off_payload(self):
+    def turn_light_off(self):
         pass
 
     @abstractmethod
-    def get_open_cover_payload(self):
+    def open_cover(self):
         pass
 
     @abstractmethod
-    def get_close_cover_payload(self):
+    def close_cover(self):
         pass
 
     @abstractmethod
-    def get_stop_cover_payload(self):
+    def stop_cover(self):
+        pass
+
+    @abstractmethod
+    def reset_battery_status(self):
+        pass
+
+    @abstractmethod
+    def reset_link_status(self):
+        pass
+
+    @abstractmethod
+    def reset_alarm_status(self):
         pass
