@@ -12,7 +12,7 @@
 
 Cette intégration gère l'interface avec une centrale d'alarme Somfy Protexial ou Protexiom et permet le pilotage:
 
-- de l'alarme par zones (A+B+C, A+B, A)
+- de l'alarme par zones (A, B, C)
 - des volets roulants
 - des lumières
 
@@ -61,8 +61,8 @@ Les entités suivantes sont gérées:
 Les différents modes d'armement exploitent les zones définies par la cofiguration de la centrale Somfy:
 
 - Armement en absence (toujours configuré): Zones A+B+C
-- Armement pour la nuit (optionnel): Zones A+B
-- Armement en présence (optionnel): Zones A
+- Armement pour la nuit (optionnel): Zones au choix (A, B, C, A+B, B+C, A+C)
+- Armement en présence (optionnel): Zones au choix (A, B, C, A+B, B+C, A+C)
 
 Code d'armement: Si vous spécifiez un code celui-ci sera demandé lors de l'armement/désarmement.
 
