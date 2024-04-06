@@ -170,7 +170,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
                 Zone.A.value + Zone.B.value if hasNightMode else Zone.NONE.value
             )
             new[CONF_HOME_ZONES] = Zone.A.value if hasHomeMode else Zone.NONE.value
-            del config_entry.data[CONF_MODES]
+            del new[CONF_MODES]
             applyMigration = True
 
         if applyMigration:

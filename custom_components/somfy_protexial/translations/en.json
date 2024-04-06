@@ -53,7 +53,7 @@
   "selector": {
     "zones": {
       "options": {
-        "0": "None",
+        "0": "Arm mode disabled",
         "1": "A",
         "2": "B",
         "4": "C",

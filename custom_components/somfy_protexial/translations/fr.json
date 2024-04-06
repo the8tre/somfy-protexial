@@ -52,7 +52,7 @@
   "selector": {
     "zones": {
       "options": {
-        "0": "Aucune",
+        "0": "Mode d'armement désactivé",
         "1": "A",
         "2": "B",
         "4": "C",
