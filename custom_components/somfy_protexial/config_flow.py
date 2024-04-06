@@ -117,7 +117,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
                 errors["base"] = "arm_code"
             elif (
-                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE.value)
                 and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
             ):
                 errors["base"] = "same_zones"
@@ -203,7 +203,7 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
             if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
                 errors["base"] = "arm_code"
             elif (
-                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE.value)
                 and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
             ):
                 errors["base"] = "same_zones"

@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum
 import logging
 import re
 from urllib.parse import urlencode
@@ -8,7 +7,11 @@ from xml.etree import ElementTree as ET
 from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
-from .const import ApiType, Page, Zone
+from .const import CHALLENGE_REGEX, HTTP_TIMEOUT, ApiType, Page, Selector, SomfyError
+from .protexial_api import ProtexialApi
+from .protexial_io_api import ProtexialIOApi
+from .protexiom_api import ProtexiomApi
+from .somfy_exception import SomfyException
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
@@ -34,28 +37,6 @@ class Status:
         return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
 
 
-class Selector(str, Enum):
-    CONTENT_TYPE = "meta[http-equiv='content-type']"
-    CHALLENGE_ELEMENT = "#form_id table tr:nth-child(4) td:nth-child(1) b"
-    ERROR_ELEMENT = "#infobox b"
-    CHALLENGE_ELEMENT_LIST = "td:not([class])"
-    FOOTER_ELEMENT = "[id^='menu_footer']"
-
-
-class Error(str, Enum):
-    WRONG_CODE = "(0x0B00)"
-    MAX_LOGIN_ATTEMPS = "(0x0904)"
-    WRONG_CREDENTIALS = "(0x0812)"
-    SESSION_ALREADY_OPEN = "(0x0902)"
-    NOT_AUTHORIZED = "(0x0903)"
-    UNKNOWN_PARAMETER = "(0x1003)"
-
-
-TIMEOUT = 10
-
-ENCODING = "iso-8859-15"
-
-
 class SomfyProtexial:
     def __init__(
         self,
@@ -73,10 +54,7 @@ class SomfyProtexial:
         self.codes = codes
         self.session = session
         self.cookie = None
-        if self.api_type == ApiType.PROTEXIAL:
-            self.api = ProtexialApi()
-        else:
-            self.api = ProtexiomApi()
+        self.api = self.load_api(self.api_type)
 
     async def __do_call(
         self,
@@ -99,12 +77,12 @@ class SomfyProtexial:
             if data:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-            async with asyncio.timeout(TIMEOUT):
+            async with asyncio.timeout(HTTP_TIMEOUT):
                 _LOGGER.debug(f"Call to: {full_path}")
                 if method == "get":
                     response = await self.session.get(full_path, headers=headers)
                 elif method == "post":
-                    encodedData = urlencode(data, encoding=ENCODING)
+                    encodedData = urlencode(data, encoding=self.api.get_encoding())
                     _LOGGER.debug(f"With payload: {data}")
                     _LOGGER.debug(f"With payload (encoded): {encodedData}")
                     response = await self.session.post(
@@ -112,7 +90,9 @@ class SomfyProtexial:
                     )
             _LOGGER.debug(f"Response path: {response.real_url.path}")
             _LOGGER.debug(f"Response headers: {response.headers}")
-            _LOGGER.debug(f"Response body: {await response.text(ENCODING)}")
+            _LOGGER.debug(
+                f"Response body: {await response.text(self.api.get_encoding())}"
+            )
 
             if response.status == 200:
                 if (
@@ -124,13 +104,13 @@ class SomfyProtexial:
                         method, page, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == self.api.get_page(Page.ERROR):
-                    dom = pq(await response.text(ENCODING))
-                    error_element = dom(Selector.ERROR_ELEMENT)
+                    dom = pq(await response.text(self.api.get_encoding()))
+                    error_element = dom(self.api.get_selector(Selector.ERROR_CODE))
                     if not error_element:
-                        raise Exception("Unknown error")
+                        raise SomfyException("Unknown error")
                     errorCode = error_element.text()
                     if (
-                        errorCode == Error.NOT_AUTHORIZED
+                        errorCode == SomfyError.NOT_AUTHORIZED
                         and not self.cookie
                         and retry is True
                     ):
@@ -138,7 +118,7 @@ class SomfyProtexial:
                         return await self.__do_call(
                             method, page, headers, data, retry=False, login=False
                         )
-                    elif errorCode == Error.SESSION_ALREADY_OPEN:
+                    elif errorCode == SomfyError.SESSION_ALREADY_OPEN:
                         if retry:
                             form = self.api.get_reset_session_payload()
                             await self.__do_call(
@@ -154,30 +134,30 @@ class SomfyProtexial:
                                 method, page, headers, data, retry=False, login=login
                             )
                         else:
-                            raise Exception("Too many login retries")
-                    elif errorCode == Error.WRONG_CREDENTIALS:
-                        raise Exception("Login failed: Wrong credentials")
-                    elif errorCode == Error.MAX_LOGIN_ATTEMPS:
-                        raise Exception("Login failed: Max attempt count reached")
-                    elif errorCode == Error.WRONG_CODE:
-                        raise Exception("Login failed: Wrong code")
-                    elif errorCode == Error.UNKNOWN_PARAMETER:
-                        raise Exception("Command failed: Unknown parameter")
+                            raise SomfyException("Too many login retries")
+                    elif errorCode == SomfyError.WRONG_CREDENTIALS:
+                        raise SomfyException("Login failed: Wrong credentials")
+                    elif errorCode == SomfyError.MAX_LOGIN_ATTEMPS:
+                        raise SomfyException("Login failed: Max attempt count reached")
+                    elif errorCode == SomfyError.WRONG_CODE:
+                        raise SomfyException("Login failed: Wrong code")
+                    elif errorCode == SomfyError.UNKNOWN_PARAMETER:
+                        raise SomfyException("Command failed: Unknown parameter")
                     else:
-                        raise Exception(
+                        raise SomfyException(
                             f"Command failed: Unknown errorCode: {errorCode}"
                         )
                 else:
                     return response
             else:
-                raise Exception(f"Http error ({response.status})")
+                raise SomfyException(f"Http error ({response.status})")
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
                 "Timeout error fetching information from %s - %s",
                 path,
                 exception,
             )
-            raise Exception(
+            raise SomfyException(
                 f"Timeout error fetching information from {full_path} - {exception}"
             )
 
@@ -187,10 +167,12 @@ class SomfyProtexial:
                 path,
                 exception,
             )
-            raise Exception(f"Error fetching information from {path} - {exception}")
+            raise SomfyException(
+                f"Error fetching information from {path} - {exception}"
+            )
         except Exception as exception:  # pylint: disable=broad-except
             _LOGGER.error("Something really wrong happened! - %s", exception)
-            raise Exception(f"Something really wrong happened! - {exception}")
+            raise SomfyException(f"Something really wrong happened! - {exception}")
 
     async def init(self):
         await self.__login()
@@ -201,8 +183,8 @@ class SomfyProtexial:
             error_response = await self.__do_call(
                 "get", Page.LOGIN, login=False, authenticated=False
             )
-            dom = pq(await error_response.text(ENCODING))
-            footer_element = dom(Selector.FOOTER_ELEMENT)
+            dom = pq(await error_response.text(self.api.get_encoding()))
+            footer_element = dom(self.api.get_selector(Selector.FOOTER))
             if footer_element is not None:
                 matches = re.search(
                     r"([0-9]{4}) somfy", footer_element.text(), re.IGNORECASE
@@ -214,95 +196,100 @@ class SomfyProtexial:
                 response = await self.__do_call(
                     "get", Page.VERSION, login=False, authenticated=False
                 )
-                version = await response.text(ENCODING)
+                version = await response.text(self.api.get_encoding())
                 version_string += f" ({version.strip()})"
         except Exception as exception:
             _LOGGER.error("Failed to extract version: %s", exception)
         return version_string
 
+    def load_api(self, api_type: ApiType):
+        if api_type == ApiType.PROTEXIAL:
+            return ProtexialApi()
+        elif api_type == ApiType.PROTEXIAL_IO:
+            return ProtexialIOApi()
+        elif api_type == ApiType.PROTEXIOM:
+            return ProtexiomApi()
+        elif api_type is not None:
+            raise SomfyException(f"Unknown api type: {type}")
+
     async def guess_and_set_api_type(self):
-        self.api = ProtexialApi()
-        # Is is a Protexial centrale having a version page
-        versionPagePath = self.api.get_page(Page.VERSION)
+        for api_type in [ApiType.PROTEXIAL_IO, ApiType.PROTEXIAL, ApiType.PROTEXIOM]:
+            self.api = self.load_api(api_type)
+            has_version_page = False
+            # Some older systems don't have a version page
+            versionPage = self.api.get_page(Page.VERSION)
+            if versionPage is not None:
+                has_version_page = True
+                version_body = await self.do_guess_get(versionPage)
+
+            # Either the system doesn't have a version page, or the page was successfully retrieved
+            if not has_version_page or version_body is not None:
+                # Now check the login page
+                loginPage = self.api.get_page(Page.LOGIN)
+                login_body = await self.do_guess_get(loginPage)
+                if login_body is not None:
+                    # The system has a login page
+                    dom = pq(login_body)
+                    challenge_element = dom(
+                        self.api.get_selector(Selector.LOGIN_CHALLENGE)
+                    )
+                    # Check if the challenge element is present
+                    if challenge_element is not None:
+                        challenge = challenge_element.text()
+                        # Check that the challenge element looks fine
+                        if re.match(CHALLENGE_REGEX, challenge):
+                            self.api_type = api_type
+                            return self.api_type
+                        else:
+                            _LOGGER.debug(f"Challenge not recognized: {challenge}")
+        raise SomfyException("Couldn't detect the centrale type")
+
+    async def do_guess_get(self, page) -> str:
         try:
-            async with asyncio.timeout(TIMEOUT):
-                _LOGGER.debug(f"Guess {self.url + versionPagePath}")
+            async with asyncio.timeout(HTTP_TIMEOUT):
+                _LOGGER.debug(f"Guess {self.url + page}")
                 response = await self.session.get(
-                    self.url + versionPagePath, headers={}
+                    self.url + page, headers={}, allow_redirects=False
                 )
             if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text(ENCODING)}")
-                # Looks like it's a model supporting the Protexial API
-                self.api_type = ApiType.PROTEXIAL
-                return self.api_type
+                response_body = await response.text(self.api.get_encoding())
+                _LOGGER.debug(
+                    f"Guess response: {await response.text(self.api.get_encoding())}"
+                )
+                return response_body
+            elif response.status == 302:
+                raise SomfyException("Unavailable, please retry later")
             # Looks like another model
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
                 "Timeout error fetching information from %s - %s",
-                versionPagePath,
+                page,
                 exception,
             )
-            raise Exception(
-                f"Timeout error fetching information from {versionPagePath} - {exception}"
+            raise SomfyException(
+                f"Timeout error fetching information from {page} - {exception}"
             )
         except ClientError as exception:
             _LOGGER.error(
                 "Error fetching information from %s - %s",
-                versionPagePath,
+                page,
                 exception,
             )
-            raise Exception(
-                f"Error fetching information from {versionPagePath} - {exception}"
+            raise SomfyException(
+                f"Error fetching information from {page} - {exception}"
             )
         except Exception as exception:
             _LOGGER.error("Something really wrong happened! - %s", exception)
-
-        self.api = ProtexiomApi()
-        # Maybe this is an older version without the locale in the path
-        errorPagePath = self.api.get_page(Page.ERROR)
-        try:
-            async with asyncio.timeout(TIMEOUT):
-                _LOGGER.debug(f"Guess {self.url + errorPagePath}")
-                response = await self.session.get(self.url + errorPagePath, headers={})
-            if response.status == 200:
-                _LOGGER.debug(f"Guess response: {await response.text(ENCODING)}")
-                self.api_type = ApiType.PROTEXIOM
-                return self.api_type
-            _LOGGER.error(
-                "Didn't find the error page, doesn't look like a Somfy centrale"
-            )
-        except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
-                errorPagePath,
-                exception,
-            )
-            raise Exception(
-                f"Timeout error fetching information from {errorPagePath} - {exception}"
-            )
-        except ClientError as exception:
-            _LOGGER.error(
-                "Error fetching information from %s - %s",
-                errorPagePath,
-                exception,
-            )
-            raise Exception(
-                f"Error fetching information from {errorPagePath} - {exception}"
-            )
-        except Exception as exception:
-            _LOGGER.error("Something really wrong happened! - %s", exception)
-        raise Exception(
-            "Didn't find the error page, doesn't look like a Somfy centrale"
-        )
+        return None
 
     async def get_challenge(self):
         login_response = await self.__do_call("get", Page.LOGIN, login=False)
-        dom = pq(await login_response.text(ENCODING))
-        challenge_element = dom(Selector.CHALLENGE_ELEMENT)
+        dom = pq(await login_response.text(self.api.get_encoding()))
+        challenge_element = dom(self.api.get_selector(Selector.LOGIN_CHALLENGE))
         if challenge_element:
             return challenge_element.text()
         else:
-            raise Exception("Challenge not found")
+            raise SomfyException("Challenge not found")
 
     async def __login(self, username=None, password=None, code=None):
         self.cookie = None
@@ -328,7 +315,7 @@ class SomfyProtexial:
         status_response = await self.__do_call(
             "get", Page.STATUS, login=False, authenticated=False
         )
-        content = await status_response.text(ENCODING)
+        content = await status_response.text(self.api.get_encoding())
         response = ET.fromstring(content)
         status = Status()
         for child in response:
@@ -361,9 +348,9 @@ class SomfyProtexial:
 
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
-        status_response = await self.__do_call("get", Page.PRINT, login=False)
-        dom = pq(await status_response.text(ENCODING))
-        all_challenge_elements = dom(Selector.CHALLENGE_ELEMENT_LIST)
+        status_response = await self.__do_call("get", Page.CHALLENGE_CARD, login=False)
+        dom = pq(await status_response.text(self.api.get_encoding()))
+        all_challenge_elements = dom(self.api.get_selector(Selector.CHALLENGE_CARD))
         challenges = {}
         chars = ["A", "B", "C", "D", "E", "F"]
         global_index = 0
@@ -401,128 +388,8 @@ class SomfyProtexial:
     async def close_cover(self):
         form = self.api.get_close_cover_payload()
         response = await self.__do_call("post", Page.PILOTAGE, data=form)
-        print(await response.text(ENCODING))
+        print(await response.text(self.api.get_encoding()))
 
     async def stop_cover(self):
         form = self.api.get_stop_cover_payload()
         await self.__do_call("post", Page.PILOTAGE, data=form)
-
-
-class ProtexialApi:
-    pages = {
-        Page.LOGIN: "/fr/login.htm",
-        Page.LOGOUT: "/logout.htm",
-        Page.PILOTAGE: "/fr/u_pilotage.htm",
-        Page.STATUS: "/status.xml",
-        Page.ERROR: "/fr/error.htm",
-        Page.ELEMENTS: "/fr/u_plistelmt.htm",
-        Page.PRINT: "/fr/u_print.htm",
-        Page.VERSION: "/cfg/vers",
-        Page.DEFAULT: "/default.htm",
-    }
-
-    def get_page(self, page: Page):
-        return self.pages[page]
-
-    def get_login_payload(self, username, password, code):
-        return {
-            "login": username,
-            "password": password,
-            "key": code,
-            "btn_login": "Connexion",
-        }
-
-    def get_reset_session_payload(self):
-        return {"btn_ok": "OK"}
-
-    def get_arm_payload(self, zone):
-        btnZone = ""
-        match zone:
-            case Zone.A:
-                btnZone = "btn_zone_on_A"
-            case Zone.B:
-                btnZone = "btn_zone_on_B"
-            case Zone.C:
-                btnZone = "btn_zone_on_C"
-            case Zone.ABC:
-                btnZone = "btn_zone_on_ABC"
-
-        return {"hidden": "hidden", btnZone: "Marche"}
-
-    def get_disarm_payload(self):
-        return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
-
-    def get_turn_light_on_payload(self):
-        return {"hidden": "hidden", "btn_lum_on": "ON"}
-
-    def get_turn_light_off_payload(self):
-        return {"hidden": "hidden", "btn_lum_off": "OFF"}
-
-    def get_open_cover_payload(self):
-        return {"hidden": "hidden", "btn_vol_up": ""}
-
-    def get_close_cover_payload(self):
-        return {"hidden": "hidden", "btn_vol_down": ""}
-
-    def get_stop_cover_payload(self):
-        return {"hidden": "hidden", "btn_vol_stop": ""}
-
-
-class ProtexiomApi:
-    pages = {
-        Page.LOGIN: "/login.htm",
-        Page.LOGOUT: "/logout.htm",
-        Page.PILOTAGE: "/u_pilotage.htm",
-        Page.STATUS: "/status.xml",
-        Page.ERROR: "/error.htm",
-        Page.ELEMENTS: "/u_plistelmt.htm",
-        Page.PRINT: "/u_print.htm",
-        Page.VERSION: None,
-        Page.DEFAULT: "/default.htm",
-    }
-
-    def get_page(self, page: Page):
-        return self.pages[page]
-
-    def get_login_payload(self, username, password, code):
-        return {
-            "login": username,
-            "password": password,
-            "key": code,
-            "action": "Connexion",
-        }
-
-    def get_reset_session_payload(self):
-        return {"action": "OK"}
-
-    def get_arm_payload(self, zone):
-        value = ""
-        match zone:
-            case Zone.A:
-                value = "Marche A"
-            case Zone.B:
-                value = "Marche B"
-            case Zone.C:
-                value = "Marche C"
-            case Zone.ABC:
-                value = "Marche A B C"
-
-        return {"hidden": "hidden", "zone": value}
-
-    def get_disarm_payload(self):
-        return {"hidden": "hidden", "zone": "Arrêt A B C"}
-
-    def get_turn_light_on_payload(self):
-        return {"hidden": "hidden", "action_lum": "ON"}
-
-    def get_turn_light_off_payload(self):
-        return {"hidden": "hidden", "action_lum": "OFF"}
-
-    def get_open_cover_payload(self):
-        return {"hidden": "hidden", "action_vol_montee": ""}
-
-    def get_close_cover_payload(self):
-        return {"hidden": "hidden", "action_vol_descente": ""}
-
-    def get_stop_cover_payload(self):
-        return {"hidden": "hidden", "action_vol_stop": ""}
