@@ -29,7 +29,7 @@ async def async_setup_entry(
 
 
 class ProtexialBinarySensor(CoordinatorEntity, BinarySensorEntity):
-    def __init__(self, device_info, coordinator, sensor: Any):
+    def __init__(self, device_info, coordinator, sensor: Any) -> None:
         super().__init__(coordinator)
         self._attr_id = f"{DOMAIN}_sensor_{sensor['id']}"
         self._attr_unique_id = f"{DOMAIN}_sensor_{sensor['id']}"

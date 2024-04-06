@@ -5,6 +5,7 @@ Somfy Protexial
 from datetime import timedelta
 import logging
 
+from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_SW_VERSION,
@@ -25,10 +26,14 @@ from .const import (
     API,
     CONF_API_TYPE,
     CONF_CODES,
+    CONF_HOME_ZONES,
+    CONF_MODES,
+    CONF_NIGHT_ZONES,
     COORDINATOR,
     DEVICE_INFO,
     DOMAIN,
     ApiType,
+    Zone,
 )
 from .protexial import SomfyProtexial
 
@@ -135,18 +140,42 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def async_migrate_entry(hass, config_entry: ConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
     if config_entry.version == 1:
+        applyMigration = False
+        new = None
         if config_entry.minor_version < 2:
             # In config version 1.1 only Protexial ApiType was supported
             # We can safely force the API to ApiType.PROTEXIAL
             new = {**config_entry.data}
             new[CONF_API_TYPE] = ApiType.PROTEXIAL
+            applyMigration = True
+
+        if config_entry.minor_version < 3:
+            # 1.3 introduces CONF_NIGHT_ZONES and CONF_HOME_ZONES
+            new = {**config_entry.data} if new is None else new
+
+            currentModes = config_entry.data[CONF_MODES]
+            hasNightMode = any(
+                m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in currentModes
+            )
+            hasHomeMode = any(
+                m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes
+            )
+
+            new[CONF_NIGHT_ZONES] = (
+                Zone.A.value + Zone.B.value if hasNightMode else Zone.NONE.value
+            )
+            new[CONF_HOME_ZONES] = Zone.A.value if hasHomeMode else Zone.NONE.value
+            del new[CONF_MODES]
+            applyMigration = True
+
+        if applyMigration:
             hass.config_entries.async_update_entry(
-                config_entry, data=new, minor_version=2, version=1
+                config_entry, data=new, minor_version=3, version=1
             )
             _LOGGER.debug(
                 "Migration to version %s.%s successful",

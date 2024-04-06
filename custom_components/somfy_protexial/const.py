@@ -10,6 +10,8 @@ CONF_CODE = "code"
 CONF_CODES = "codes"
 CONF_MODES = "modes"
 CONF_ARM_CODE = "arm_code"
+CONF_NIGHT_ZONES = "night_zones"
+CONF_HOME_ZONES = "home_zones"
 
 API = "api"
 COORDINATOR = "coordinator"
@@ -35,6 +37,17 @@ class SomfyError(str, Enum):
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
     UNKNOWN_PARAMETER = "(0x1003)"
+
+
+class Zone(Enum):
+    NONE = 0
+    A = 1
+    B = 2
+    C = 4
+    ABC = 7
+
+
+ALL_ZONES = ["0", "1", "2", "4", "3", "6", "5"]
 
 
 class ApiType(str, Enum):

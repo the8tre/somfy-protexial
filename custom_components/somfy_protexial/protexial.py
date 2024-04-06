@@ -7,7 +7,15 @@ from xml.etree import ElementTree as ET
 from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
-from .const import CHALLENGE_REGEX, HTTP_TIMEOUT, ApiType, Page, Selector, SomfyError
+from .const import (
+    CHALLENGE_REGEX,
+    HTTP_TIMEOUT,
+    ApiType,
+    Page,
+    Selector,
+    SomfyError,
+    Zone,
+)
 from .protexial_api import ProtexialApi
 from .protexial_io_api import ProtexialIOApi
 from .protexiom_api import ProtexiomApi
