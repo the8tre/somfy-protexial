@@ -14,7 +14,6 @@ from .const import (
     Page,
     Selector,
     SomfyError,
-    Zone,
 )
 from .protexial_api import ProtexialApi
 from .protexial_io_api import ProtexialIOApi

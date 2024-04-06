@@ -20,13 +20,6 @@ DEVICE_INFO = "device_info"
 CHALLENGE_REGEX = r"[A-F]{1}[1-5]{1}"
 
 
-class Zone(Enum):
-    A = 0
-    B = 1
-    C = 2
-    ABC = 3
-
-
 HTTP_TIMEOUT = 10
 
 
