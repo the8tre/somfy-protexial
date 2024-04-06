@@ -17,11 +17,10 @@
         }
       },
       "config": {
-        "description": "Choose other arm modes in addition to 'Arm away (Zones A+B+C)'",
+        "description": "Choose other optional arm modes in addition to 'Arm away (Zones A+B+C)'",
         "data": {
-          "armed_away": "Arm away (Zones A+B+C)",
-          "armed_night": "Arm night (Zones A+B)",
-          "armed_home": "Arm home (Zone A only)",
+          "night_zones": "Arm night zone(s)",
+          "home_zones": "Arm home zone(s)",
           "arm_code": "Optional 4 digits arm code",
           "scan_interval": "Scan interval (seconds)"
         }
@@ -30,20 +29,37 @@
     "error": {
       "auth": "Wrong Username/Password/Code.",
       "connection": "Unable to connect to the server.",
-      "arm_code": "Arm code must be 4 digits."
+      "arm_code": "Arm code must be 4 digits.",
+      "same_zones": "Selected zones for night and away arm modes must be different."
     }
   },
   "options": {
     "step": {
       "init": {
-        "description": "Choose other arm modes in addition to 'Arm away (Zones A+B+C)'",
+        "description": "Choose other optional arm modes in addition to 'Arm away (Zones A+B+C)'",
         "data": {
-          "armed_away": "Arm away (Zones A+B+C)",
-          "armed_night": "Arm night (Zones A+B)",
-          "armed_home": "Arm home (Zone A only)",
+          "night_zones": "Arm night zone(s)",
+          "home_zones": "Arm home zone(s)",
           "arm_code": "Optional 4 digits arm code",
           "scan_interval": "Scan interval (seconds)"
         }
+      }
+    },
+    "error": {
+      "arm_code": "Arm code must be 4 digits.",
+      "same_zones": "Selected zones for night and away arm modes must be different."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Arm mode disabled",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
       }
     }
   }

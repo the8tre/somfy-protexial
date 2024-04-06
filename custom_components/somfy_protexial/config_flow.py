@@ -4,15 +4,12 @@ from typing import Any
 from urllib.parse import urlparse
 
 from homeassistant import config_entries
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.const import (
     ATTR_SW_VERSION,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
     CONF_USERNAME,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
 )
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
@@ -21,6 +18,9 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -28,12 +28,15 @@ from homeassistant.helpers.selector import (
 import voluptuous as vol
 
 from .const import (
+    ALL_ZONES,
     CONF_API_TYPE,
     CONF_ARM_CODE,
     CONF_CODE,
     CONF_CODES,
-    CONF_MODES,
+    CONF_HOME_ZONES,
+    CONF_NIGHT_ZONES,
     DOMAIN,
+    Zone,
 )
 from .protexial import SomfyProtexial
 
@@ -42,7 +45,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-    MINOR_VERSION = 2
+    MINOR_VERSION = 3
 
     async def async_step_user(self, user_input):
         if self._async_current_entries():
@@ -110,14 +113,17 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             arm_code = (
                 user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
             )
-            if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
-                modes = []
-                # if user_input[STATE_ALARM_ARMED_AWAY]:
-                modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
-                if user_input[STATE_ALARM_ARMED_NIGHT]:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
-                if user_input[STATE_ALARM_ARMED_HOME]:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
+
+            if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
+                errors["base"] = "arm_code"
+            elif (
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
+                and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
+            ):
+                errors["base"] = "same_zones"
+            else:
+                night_zones = int(user_input[CONF_NIGHT_ZONES])
+                home_zones = int(user_input[CONF_HOME_ZONES])
                 return self.async_create_entry(
                     title=self.url,
                     data={
@@ -126,23 +132,39 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_USERNAME: self.username,
                         CONF_PASSWORD: self.password,
                         CONF_CODES: self.codes,
-                        CONF_MODES: modes,
+                        CONF_NIGHT_ZONES: night_zones,
+                        CONF_HOME_ZONES: home_zones,
                         CONF_ARM_CODE: arm_code,
                         CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
                         ATTR_SW_VERSION: self.version,
                     },
                 )
-            else:
-                errors["base"] = "arm_code"
 
         return self.async_show_form(
             step_id="config",
             errors=errors,
             data_schema=vol.Schema(
                 {
-                    # vol.Required(STATE_ALARM_ARMED_AWAY, default=True): cv.boolean,
-                    vol.Optional(STATE_ALARM_ARMED_NIGHT, default=False): cv.boolean,
-                    vol.Optional(STATE_ALARM_ARMED_HOME, default=False): cv.boolean,
+                    vol.Required(
+                        CONF_NIGHT_ZONES,
+                        default=str(Zone.NONE.value),
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=ALL_ZONES,
+                            mode=SelectSelectorMode.DROPDOWN,
+                            translation_key="zones",
+                        )
+                    ),
+                    vol.Required(
+                        CONF_HOME_ZONES,
+                        default=str(Zone.NONE.value),
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=ALL_ZONES,
+                            mode=SelectSelectorMode.DROPDOWN,
+                            translation_key="zones",
+                        )
+                    ),
                     vol.Optional(CONF_ARM_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
                     ),
@@ -177,21 +199,25 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
             arm_code = (
                 user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
             )
-            if arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
-                modes = []
-                # if user_input[STATE_ALARM_ARMED_AWAY]:
-                modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
-                if user_input[STATE_ALARM_ARMED_NIGHT]:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
-                if user_input[STATE_ALARM_ARMED_HOME]:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
 
+            if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
+                errors["base"] = "arm_code"
+            elif (
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
+                and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
+            ):
+                errors["base"] = "same_zones"
+            else:
+                night_zones = int(user_input[CONF_NIGHT_ZONES])
+                home_zones = int(user_input[CONF_HOME_ZONES])
                 newData = {
                     CONF_URL: self.config_entry.data[CONF_URL],
+                    CONF_API_TYPE: self.config_entry.data[CONF_API_TYPE],
                     CONF_USERNAME: self.config_entry.data[CONF_USERNAME],
                     CONF_PASSWORD: self.config_entry.data[CONF_PASSWORD],
                     CONF_CODES: self.config_entry.data[CONF_CODES],
-                    CONF_MODES: modes,
+                    CONF_NIGHT_ZONES: night_zones,
+                    CONF_HOME_ZONES: home_zones,
                     CONF_ARM_CODE: arm_code,
                     CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
                     ATTR_SW_VERSION: self.config_entry.data[ATTR_SW_VERSION],
@@ -200,28 +226,35 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
                     self.config_entry, data=newData, options=self.config_entry.options
                 )
                 return self.async_create_entry(title="", data={})
-            else:
-                errors["base"] = "arm_code"
 
-        currentModes = self.config_entry.data[CONF_MODES]
-        hasHomeMode = any(
-            m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes
-        )
-        hasNightMode = any(
-            m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in currentModes
-        )
+        current_night_zones = str(self.config_entry.data[CONF_NIGHT_ZONES])
+        current_home_zones = str(self.config_entry.data[CONF_HOME_ZONES])
+
         return self.async_show_form(
             step_id="init",
             errors=errors,
             data_schema=vol.Schema(
                 {
-                    # vol.Required(STATE_ALARM_ARMED_AWAY, default=True): cv.boolean,
-                    vol.Optional(
-                        STATE_ALARM_ARMED_NIGHT, default=hasNightMode
-                    ): cv.boolean,
-                    vol.Optional(
-                        STATE_ALARM_ARMED_HOME, default=hasHomeMode
-                    ): cv.boolean,
+                    vol.Required(
+                        CONF_NIGHT_ZONES,
+                        default=current_night_zones,
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=ALL_ZONES,
+                            mode=SelectSelectorMode.DROPDOWN,
+                            translation_key="zones",
+                        )
+                    ),
+                    vol.Required(
+                        CONF_HOME_ZONES,
+                        default=current_home_zones,
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=ALL_ZONES,
+                            mode=SelectSelectorMode.DROPDOWN,
+                            translation_key="zones",
+                        )
+                    ),
                     vol.Optional(CONF_ARM_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
                     ),
