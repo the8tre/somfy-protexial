@@ -19,23 +19,14 @@ DEVICE_INFO = "device_info"
 
 
 class Zone(Enum):
-    A = 0
-    B = 1
-    C = 2
-    ABC = 3
+    NONE = 0
+    A = 1
+    B = 2
+    C = 4
+    ABC = 7
 
 
-class Zones(str, Enum):
-    NONE = "none"
-    AB = "ab"
-    AC = "ac"
-    BC = "bc"
-    A = "a"
-    B = "b"
-    C = "c"
-
-
-ALL_ZONES = [Zones.NONE, Zones.AB, Zones.BC, Zones.AC, Zones.A, Zones.B, Zones.C]
+ALL_ZONES = ["0", "1", "2", "4", "3", "6", "5"]
 
 
 class ApiType(str, Enum):

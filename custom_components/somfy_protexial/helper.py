@@ -1,42 +1,19 @@
-from .const import Zone, Zones
+from .const import Zone
 
 
-def zones_to_zone_array(zones) -> list[Zone]:
-    match zones:
-        case Zones.AB:
-            return [Zone.A, Zone.B]
-        case Zones.BC:
-            return [Zone.B, Zone.C]
-        case Zones.AC:
-            return [Zone.A, Zone.C]
-        case Zones.A:
+def int_to_zones(int_zones: int) -> list[Zone]:
+    match int_zones:
+        case 0:
+            return [Zone.NONE]
+        case 1:
             return [Zone.A]
-        case Zones.B:
+        case 2:
             return [Zone.B]
-        case Zones.C:
+        case 4:
             return [Zone.C]
-
-
-def ints_to_zone_array(int_zones: list[int]) -> list[Zone]:
-    if int_zones is None:
-        return None
-    return list(map(lambda z: Zone(z), int_zones))
-
-
-def zones_from_zone_array(zones: list[Zone]):
-    if zones is None:
-        return Zones.NONE
-    if len(zones) == 1:
-        match zones[0]:
-            case Zone.A:
-                return Zones.A
-            case Zone.B:
-                return Zones.B
-            case Zone.B:
-                return Zones.C
-    elif set(zones).issubset([Zone.A, Zone.B]):
-        return Zones.AB
-    elif set(zones).issubset([Zone.A, Zone.C]):
-        return Zones.AC
-    elif set(zones).issubset([Zone.B, Zone.C]):
-        return Zones.BC
+        case 3:
+            return [Zone.A, Zone.B]
+        case 6:
+            return [Zone.B, Zone.C]
+        case 5:
+            return [Zone.A, Zone.C]

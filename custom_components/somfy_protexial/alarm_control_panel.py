@@ -3,6 +3,7 @@ import logging
 
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
+    AlarmControlPanelEntityFeature,
     CodeFormat,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -21,15 +22,13 @@ from .const import (
     API,
     CONF_ARM_CODE,
     CONF_HOME_ZONES,
-    CONF_MODES,
     CONF_NIGHT_ZONES,
     COORDINATOR,
     DEVICE_INFO,
     DOMAIN,
     Zone,
 )
-
-from .helper import ints_to_zone_array
+from .helper import int_to_zones
 
 DEFAULT_ALARM_NAME = "Alarme"
 ACTIVATION_ALARM_CODE = None
@@ -46,31 +45,32 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
     device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
     api = hass.data[DOMAIN][config_entry.entry_id][API]
-    modes = config_entry.data.get(CONF_MODES)
     night_zones = config_entry.data.get(CONF_NIGHT_ZONES)
     home_zones = config_entry.data.get(CONF_HOME_ZONES)
     arm_code = config_entry.data.get(CONF_ARM_CODE)
     alarms = []
     alarms.append(
-        ProtexialAlarm(
-            device_info, coordinator, api, modes, night_zones, home_zones, arm_code
-        )
+        ProtexialAlarm(device_info, coordinator, api, night_zones, home_zones, arm_code)
     )
     async_add_entities(alarms)
 
 
 class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     def __init__(
-        self, device_info, coordinator, api, modes, night_zones, home_zones, arm_code
+        self, device_info, coordinator, api, night_zones, home_zones, arm_code
     ) -> None:
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_control_alarm"
         self._attr_device_info = device_info
         self.coordinator = coordinator
         self.api = api
-        self.modes = modes
-        self.night_zones = ints_to_zone_array(night_zones)
-        self.home_zones = ints_to_zone_array(home_zones)
+        self.night_zones = night_zones
+        self.home_zones = home_zones
+        self.modes = [AlarmControlPanelEntityFeature.ARM_AWAY]
+        if self.night_zones > 0:
+            self.modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
+        if self.home_zones > 0:
+            self.modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
         self.arm_code = arm_code
         self._changed_by = None
         self._attr_state = self.__getCurrentState()
@@ -108,39 +108,25 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         self.async_write_ha_state()
 
     def __getCurrentState(self):
-        active_zones = []
+        active_zones = Zone.NONE.value
         if self.coordinator.data.zoneA == "on":
-            active_zones.append(Zone.A)
+            active_zones += Zone.A.value
         if self.coordinator.data.zoneB == "on":
-            active_zones.append(Zone.B)
+            active_zones += Zone.B.value
         if self.coordinator.data.zoneC == "on":
-            active_zones.append(Zone.C)
+            active_zones += Zone.C.value
 
-        if len(active_zones) == 0:
+        if active_zones == Zone.NONE.value:
             return STATE_ALARM_DISARMED
 
-        if len(active_zones) == 3:
+        if active_zones == Zone.ABC.value:
             return STATE_ALARM_ARMED_AWAY
 
-        if len(active_zones) == 1:
-            if self.night_zones is not None and set(self.night_zones).issubset(
-                active_zones
-            ):
-                return STATE_ALARM_ARMED_NIGHT
-            if self.home_zones is not None and set(self.home_zones).issubset(
-                active_zones
-            ):
-                return STATE_ALARM_ARMED_HOME
+        if active_zones == self.night_zones:
+            return STATE_ALARM_ARMED_NIGHT
 
-        if len(active_zones) == 2:
-            if self.night_zones is not None and set(active_zones).issubset(
-                self.night_zones
-            ):
-                return STATE_ALARM_ARMED_NIGHT
-            if self.home_zones is not None and set(active_zones).issubset(
-                self.home_zones
-            ):
-                return STATE_ALARM_ARMED_HOME
+        if active_zones == self.home_zones:
+            return STATE_ALARM_ARMED_HOME
 
     async def async_alarm_disarm(self, code=None):
         self.check_arm_code(code)
@@ -166,6 +152,6 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         if not self.arm_code == code:
             raise HomeAssistantError("Invalid code")
 
-    async def __arm_zones(self, zones):
-        for zone in zones:
-            await self.api.arm(Zone(zone))
+    async def __arm_zones(self, int_zones):
+        for zone in int_to_zones(int_zones):
+            await self.api.arm(zone)

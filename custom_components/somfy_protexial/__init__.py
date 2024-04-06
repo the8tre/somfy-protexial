@@ -5,6 +5,7 @@ Somfy Protexial
 from datetime import timedelta
 import logging
 
+from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_SW_VERSION,
@@ -14,7 +15,6 @@ from homeassistant.const import (
     CONF_USERNAME,
     Platform,
 )
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client, device_registry as dr
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
@@ -166,8 +166,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
                 m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes
             )
 
-            new[CONF_NIGHT_ZONES] = [Zone.A, Zone.B] if hasNightMode else None
-            new[CONF_HOME_ZONES] = [Zone.A] if hasHomeMode else None
+            new[CONF_NIGHT_ZONES] = (
+                Zone.A.value + Zone.B.value if hasNightMode else Zone.NONE.value
+            )
+            new[CONF_HOME_ZONES] = Zone.A.value if hasHomeMode else Zone.NONE.value
+            del config_entry.data[CONF_MODES]
             applyMigration = True
 
         if applyMigration:

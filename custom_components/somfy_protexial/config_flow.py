@@ -4,7 +4,6 @@ from typing import Any
 from urllib.parse import urlparse
 
 from homeassistant import config_entries
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.const import (
     ATTR_SW_VERSION,
     CONF_PASSWORD,
@@ -35,13 +34,10 @@ from .const import (
     CONF_CODE,
     CONF_CODES,
     CONF_HOME_ZONES,
-    CONF_MODES,
     CONF_NIGHT_ZONES,
     DOMAIN,
     Zone,
-    Zones,
 )
-from .helper import ints_to_zone_array, zones_from_zone_array, zones_to_zone_array
 from .protexial import SomfyProtexial
 
 _LOGGER = logging.getLogger(__name__)
@@ -117,23 +113,17 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             arm_code = (
                 user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
             )
-            if (
-                user_input[CONF_NIGHT_ZONES] != Zones.NONE
+
+            if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
+                errors["base"] = "arm_code"
+            elif (
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
                 and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
             ):
                 errors["base"] = "same_zones"
-            elif arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
-                modes = []
-                night_zones = None
-                home_zones = None
-                # if user_input[STATE_ALARM_ARMED_AWAY]:
-                modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
-                if user_input[CONF_NIGHT_ZONES] != Zones.NONE:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
-                    night_zones = zones_to_zone_array(user_input[CONF_NIGHT_ZONES])
-                if user_input[CONF_HOME_ZONES] != Zones.NONE:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
-                    home_zones = zones_to_zone_array(user_input[CONF_HOME_ZONES])
+            else:
+                night_zones = int(user_input[CONF_NIGHT_ZONES])
+                home_zones = int(user_input[CONF_HOME_ZONES])
                 return self.async_create_entry(
                     title=self.url,
                     data={
@@ -142,7 +132,6 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_USERNAME: self.username,
                         CONF_PASSWORD: self.password,
                         CONF_CODES: self.codes,
-                        CONF_MODES: modes,
                         CONF_NIGHT_ZONES: night_zones,
                         CONF_HOME_ZONES: home_zones,
                         CONF_ARM_CODE: arm_code,
@@ -150,8 +139,6 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         ATTR_SW_VERSION: self.version,
                     },
                 )
-            else:
-                errors["base"] = "arm_code"
 
         return self.async_show_form(
             step_id="config",
@@ -160,7 +147,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required(
                         CONF_NIGHT_ZONES,
-                        default=Zones.NONE,
+                        default=str(Zone.NONE.value),
                     ): SelectSelector(
                         SelectSelectorConfig(
                             options=ALL_ZONES,
@@ -170,7 +157,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     ),
                     vol.Required(
                         CONF_HOME_ZONES,
-                        default=Zones.NONE,
+                        default=str(Zone.NONE.value),
                     ): SelectSelector(
                         SelectSelectorConfig(
                             options=ALL_ZONES,
@@ -212,30 +199,23 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
             arm_code = (
                 user_input[CONF_ARM_CODE] if CONF_ARM_CODE in user_input else None
             )
-            if (
-                user_input[CONF_NIGHT_ZONES] != Zones.NONE
+
+            if arm_code is not None and not re.match("^[0-9]{4}$", str(arm_code)):
+                errors["base"] = "arm_code"
+            elif (
+                user_input[CONF_NIGHT_ZONES] != str(Zone.NONE)
                 and user_input[CONF_NIGHT_ZONES] == user_input[CONF_HOME_ZONES]
             ):
                 errors["base"] = "same_zones"
-            elif arm_code is None or re.match("^[0-9]{4}$", str(arm_code)):
-                modes = []
-                night_zones = None
-                home_zones = None
-                modes.append(AlarmControlPanelEntityFeature.ARM_AWAY)
-                if user_input[CONF_NIGHT_ZONES] != Zones.NONE:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_NIGHT)
-                    night_zones = zones_to_zone_array(user_input[CONF_NIGHT_ZONES])
-                if user_input[CONF_HOME_ZONES] != Zones.NONE:
-                    modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
-                    home_zones = zones_to_zone_array(user_input[CONF_HOME_ZONES])
-
+            else:
+                night_zones = int(user_input[CONF_NIGHT_ZONES])
+                home_zones = int(user_input[CONF_HOME_ZONES])
                 newData = {
                     CONF_URL: self.config_entry.data[CONF_URL],
                     CONF_API_TYPE: self.config_entry.data[CONF_API_TYPE],
                     CONF_USERNAME: self.config_entry.data[CONF_USERNAME],
                     CONF_PASSWORD: self.config_entry.data[CONF_PASSWORD],
                     CONF_CODES: self.config_entry.data[CONF_CODES],
-                    CONF_MODES: modes,
                     CONF_NIGHT_ZONES: night_zones,
                     CONF_HOME_ZONES: home_zones,
                     CONF_ARM_CODE: arm_code,
@@ -246,15 +226,9 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
                     self.config_entry, data=newData, options=self.config_entry.options
                 )
                 return self.async_create_entry(title="", data={})
-            else:
-                errors["base"] = "arm_code"
 
-        current_night_zones = zones_from_zone_array(
-            ints_to_zone_array(self.config_entry.data[CONF_NIGHT_ZONES])
-        )
-        current_home_zones = zones_from_zone_array(
-            ints_to_zone_array(self.config_entry.data[CONF_HOME_ZONES])
-        )
+        current_night_zones = str(self.config_entry.data[CONF_NIGHT_ZONES])
+        current_home_zones = str(self.config_entry.data[CONF_HOME_ZONES])
 
         return self.async_show_form(
             step_id="init",
