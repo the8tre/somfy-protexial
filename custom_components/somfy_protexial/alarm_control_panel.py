@@ -98,6 +98,11 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             return CodeFormat.NUMBER
 
     @property
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+        return self.arm_code is not None
+
+    @property
     def changed_by(self):
         """Return the last change triggered by."""
         return self._changed_by
