@@ -66,3 +66,12 @@ class ProtexiomApi(AbstractApi):
 
     def stop_cover(self):
         return {"hidden": "hidden", "action_vol_stop": ""}
+
+    def reset_battery_status(self):
+        return {"btn_del_pil": "Piles"}
+
+    def reset_link_status(self):
+        return {"btn_del_lia": "Liaisons"}
+
+    def reset_alarm_status(self):
+        return {"btn_del_alm": "Alarmes"}

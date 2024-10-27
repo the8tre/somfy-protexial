@@ -108,12 +108,13 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         self.async_write_ha_state()
 
     def __getCurrentState(self):
+        aggregatedData = self.coordinator.data["aggregated"]
         active_zones = Zone.NONE.value
-        if self.coordinator.data.zoneA == "on":
+        if aggregatedData.zoneA == "on":
             active_zones += Zone.A.value
-        if self.coordinator.data.zoneB == "on":
+        if aggregatedData.zoneB == "on":
             active_zones += Zone.B.value
-        if self.coordinator.data.zoneC == "on":
+        if aggregatedData.zoneC == "on":
             active_zones += Zone.C.value
 
         if active_zones == Zone.NONE.value:

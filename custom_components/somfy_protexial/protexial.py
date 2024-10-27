@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+import time
 from urllib.parse import urlencode
 from xml.etree import ElementTree as ET
 
@@ -55,6 +56,11 @@ class SomfyProtexial:
         self.session = session
         self.cookie = None
         self.api = self.load_api(self.api_type)
+
+    def update_credentials(self, username, password, codes):
+        self.username = username
+        self.password = password
+        self.codes = codes
 
     async def __do_call(
         self,
@@ -205,9 +211,9 @@ class SomfyProtexial:
     def load_api(self, api_type: ApiType):
         if api_type == ApiType.PROTEXIAL:
             return ProtexialApi()
-        elif api_type == ApiType.PROTEXIAL_IO:
+        if api_type == ApiType.PROTEXIAL_IO:
             return ProtexialIOApi()
-        elif api_type == ApiType.PROTEXIOM:
+        if api_type == ApiType.PROTEXIOM:
             return ProtexiomApi()
         elif api_type is not None:
             raise SomfyException(f"Unknown api type: {type}")
@@ -224,6 +230,7 @@ class SomfyProtexial:
 
             # Either the system doesn't have a version page, or the page was successfully retrieved
             if not has_version_page or version_body is not None:
+                await self.do_guess_reset_session(self.api.get_page(Page.ERROR))
                 # Now check the login page
                 loginPage = self.api.get_page(Page.LOGIN)
                 login_body = await self.do_guess_get(loginPage)
@@ -243,6 +250,35 @@ class SomfyProtexial:
                         else:
                             _LOGGER.debug(f"Challenge not recognized: {challenge}")
         raise SomfyException("Couldn't detect the centrale type")
+
+    async def do_guess_reset_session(self, page) -> str:
+        try:
+            async with asyncio.timeout(HTTP_TIMEOUT):
+                _LOGGER.debug(f"Guess {self.url + page}")
+                response = await self.session.post(
+                    self.url + page, headers={}, allow_redirects=False
+                )
+        except asyncio.TimeoutError as exception:
+            _LOGGER.error(
+                "Timeout error fetching information from %s - %s",
+                page,
+                exception,
+            )
+            raise SomfyException(
+                f"Timeout error fetching information from {page} - {exception}"
+            )
+        except ClientError as exception:
+            _LOGGER.error(
+                "Error fetching information from %s - %s",
+                page,
+                exception,
+            )
+            raise SomfyException(
+                f"Error fetching information from {page} - {exception}"
+            )
+        except Exception as exception:
+            _LOGGER.error("Something really wrong happened! - %s", exception)
+        return None
 
     async def do_guess_get(self, page) -> str:
         try:
@@ -310,6 +346,31 @@ class SomfyProtexial:
     async def logout(self):
         await self.__do_call("get", Page.LOGOUT, retry=False, login=False)
         self.cookie = None
+
+    async def get_elements_status(self):
+        boolean_types = set(["elt_pile", "elt_as", "elt_maison", "elt_onde"])
+        elements_regex = r"(item_[a-z]+|elt_[a-z]+)\s*=\s*\[(.*)\]"
+        elements_response = await self.__do_call(
+            "get", Page.ELEMENTS, login=False, authenticated=True
+        )
+        elements_page = await elements_response.text(self.api.get_encoding())
+        matches = re.finditer(elements_regex, elements_page, re.MULTILINE)
+        elements_data = []
+        for numMatch, match in enumerate(matches, start=1):
+            data_type = match.group(1)
+            is_boolean_type = data_type in boolean_types
+            values = match.group(2).replace('"', "").split(", ")
+            for i, value in enumerate(values):
+                if len(elements_data) < len(values):
+                    elements_data.append({})
+                if is_boolean_type:
+                    if value == "itemhidden":
+                        elements_data[i][data_type] = None
+                    else:
+                        elements_data[i][data_type] = not value.endswith("nok")
+                else:
+                    elements_data[i][data_type] = value
+        return elements_data
 
     async def get_status(self):
         status_response = await self.__do_call(
@@ -400,7 +461,7 @@ class SomfyProtexial:
     async def reset_link_status(self):
         form = self.api.reset_link_status()
         await self.__do_call("post", Page.ELEMENTS, data=form)
-    
+
     async def reset_alarm_status(self):
         form = self.api.reset_alarm_status()
         await self.__do_call("post", Page.ELEMENTS, data=form)

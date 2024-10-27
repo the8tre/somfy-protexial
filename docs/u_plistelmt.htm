@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+    <head>
+        <meta http-equiv="content-type" content="text/html;  charset=iso-8859-15"/>
+        <meta http-equiv="content-style-type" content="text/css"/>
+        <title>Liste des éléments du système</title>
+        <link rel="stylesheet" type "text/css" href="/domis_user.css">
+        <link rel="shortcut icon" href="/somfy.ico" type="image/x-icon"/>
+        <meta name="language" content="fr"/>
+    </head>
+    <body>
+        <div id="content_pup" class="contentall">
+            <div>
+                <a href="javascript:window.print()">Imprimer</a>
+            </div>
+            <div id="itemlistcolumnlegend"></div>
+            <div id="itemlist">
+                <script type="text/javascript">
+                    var item_type = ["typetrans", "typekeyb", "typesirenint", "typetecfumee", "typedm", "typedm", "typeremotemulti", "typetecfumee", "typesirenext"];
+                    var item_label = ["Tr Tél", "Cl lcd", "Sir int", "D. fumée", "DM", "DM", "TC multi", "D. fumée", "Sir ext"];
+                    var item_pause = ["running", "running", "paused", "running", "running", "running", "running", "running", "running"];
+                    var elt_name = ["", "", "", "Etage", "Entree", "Salon", "", "Entree", ""];
+                    var elt_code = ["596086", "837852", "603775", "713564", "267632", "267616", "146990", "713582", "486108"];
+                    var elt_pile = ["itembattok", "itembattok", "itembattok", "itembattok", "itembattnok", "itembattok", "itemhidden", "itembattok", "itembattnok"];
+                    var elt_as = ["itemboxok", "itemboxok", "itemboxok", "itemhidden", "itemboxok", "itemboxok", "itemhidden", "itemhidden", "itemboxok"];
+                    var elt_maison = ["itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok"];
+                    var elt_onde = ["itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemhidden", "itemcomok", "itemcomok"];
+                    var elt_porte = ["itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden"];
+                    var elt_zone = ["SYS", "SYS", "SYS", "TEC", "AT (f)", "A (f)", "SYS", "TEC", "SYS"];
+
+                    var i = 0;
+                    for (i = 0; i < 9; i++) {
+                        document.write("<div class=\"item_pup\">");
+                        document.write("<div class=\"" + item_type[i] + "\">" + item_label[i] + "<div class=\"" + item_pause[i] + "\">&nbsp;</div></div>");
+                        document.write("<div class=\"iteminfo\">");
+                        document.write(elt_name[i] + "<br />" + elt_code[i]);
+                        document.write("</div>");
+                        /* Battery */
+                        document.write("<div class=\"" + elt_pile[i] + "\">&nbsp;</div>");
+                        /* Comm */
+                        document.write("<div class=\"" + elt_onde[i] + "\">&nbsp;</div>");
+                        /* Door */
+                        document.write("<div class=\"" + elt_porte[i] + "\">&nbsp;</div>");
+                        /* House */
+                        document.write("<div class=\"" + elt_maison[i] + "\">&nbsp;</div>");
+                        /* Box */
+                        document.write("<div class=\"" + elt_as[i] + "\">&nbsp;</div>");
+                        /* Zone */
+                        document.write("<div class=\"itemgroup\">" + elt_zone[i] + "</div>");
+                        document.write("</div>");
+                    }
+                </script>
+            </div>
+            <div id="link_pup">
+                <a href="javascript:self.close()">Fermer la fenêtre</a>
+            </div>
+        </div>
+    </body>
+</html>

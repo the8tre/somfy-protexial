@@ -9,7 +9,6 @@ from homeassistant.components.alarm_control_panel import AlarmControlPanelEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_SW_VERSION,
-    ATTR_ENTITY_ID,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -78,7 +77,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def _get_status():
         try:
-            status = await protexial.get_status()
+            status = {}
+            status["aggregated"] = await protexial.get_status()
+            status["elements"] = await protexial.get_elements_status()
             _LOGGER.debug(status)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
@@ -91,6 +92,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_method=_get_status,
         update_interval=timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL)),
     )
+
+    # status_data = await protexial.get_status()
+    await coordinator.async_config_entry_first_refresh()
+    # await coordinator.async_set_updated_data(status_data)
 
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(

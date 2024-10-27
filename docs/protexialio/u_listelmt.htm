@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <meta http-equiv="content-style-type" content="text/css"/>
+        <title>Centrale &nbsp;:&nbsp;Utilisateur</title>
+        <link rel="shortcut icon" href="/domis.ico" type="image/x-icon"/>
+        <meta name="language" content="fr"/>
+        <meta http-equiv="expires" content="0">
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache, must-revalidate">
+        <link href="/domis_user.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="/js/ajax.js"></script>
+    </head>
+    <body onLoad="allowAJAX=true;" onUnload="allowAJAX=false;">
+        <div id="page">
+            <div id="fond">
+                <div id="menu">
+                    <div class="logohmb">&nbsp;</div>
+                    <div id="filler">&nbsp;</div>
+                    <a class="menuvoid" href="u_pilotage.htm">Piloter mon alarme et mes automatismes</a>
+                    <a class="menuvoid" href="u_regcam.htm">Mes images</a>
+                    <a class="menuvoid" href="u_listelmt.htm">Liste des éléments</a>
+                    <a class="menuvoid" href="journal.htm">Journal des évènements</a>
+                    <a class="menuvoid" href="u_regqck.htm">Réglages rapides</a>
+                    <a class="menuvoid" href="regalm.htm">Réglage mise sous alarme</a>
+                    <a class="menuvoid" href="u_regvol.htm">Réglage volets roulants</a>
+                    <a class="menuvoid" href="u_reglum.htm">Réglage lumières</a>
+                    <a class="menuvoid" href="u_challenge.htm">Carte d'authentification</a>
+                </div>
+                <div id="navbar">
+                    <div id="mode">Utilisateur</div>
+                    <div id="disconnect">
+                        <a href="/logout.htm">Deconnexion</a>
+                    </div>
+                    <div id="refresh">
+                        <a href="javascript:location.reload(true)">Actualiser</a>
+                    </div>
+                </div>
+                <div id="titlebar">
+                    <div class="titlevoid">Liste des éléments du système</div>
+                    <div class="titlecorner"></div>
+                    <script type="text/javascript" charset="UTF-8">
+                        function updateStatus(xmlData) {
+                            // Loop over all the group
+                            for (i = 0; i < 3; i++) {
+                                if (getXMLValue(xmlData, 'zone' + i) == 'on') {
+                                    document.getElementById('zone' + i).className = 'zone' + i + '_on';
+                                } else if (getXMLValue(xmlData, 'zone' + i) == 'off') {
+                                    document.getElementById('zone' + i).className = 'zone' + i + '_off';
+                                }
+                            }
+                            // Loop over all the Defaults
+                            for (i = 0; i < 5; i++) {
+                                if (getXMLValue(xmlData, 'defaut' + i) == 'ok') {
+                                    document.getElementById('defaut' + i).className = 'defaut' + i + '_ok';
+                                } else if (getXMLValue(xmlData, 'defaut' + i) == 'nok') {
+                                    document.getElementById('defaut' + i).className = 'defaut' + i + '_nok';
+                                }/*Specific case for intrusion detection*/
+                                else if (getXMLValue(xmlData, 'defaut' + i) == 'nok_int') {
+                                    document.getElementById('defaut' + i).className = 'defaut' + i + '_intrusion';
+                                }/*Specific case for domestic default detection*/
+                                else if (getXMLValue(xmlData, 'defaut' + i) == 'nok_dom') {
+                                    document.getElementById('defaut' + i).className = 'defaut' + i + '_domestic';
+                                }
+                            }
+
+                            // GSM management
+                            if (document.getElementById('operator_gsm') != null) {
+                                document.getElementById('operator_gsm').innerHTML = getXMLValue(xmlData, 'opegsm');
+                            }
+                            if (document.getElementById('status_gsm') != null) {
+                                document.getElementById('status_gsm').innerHTML = getXMLValue(xmlData, 'gsm');
+                            }
+
+                            // GSM radio reception level indicator 
+                            if (getXMLValue(xmlData, 'recgsm') == '0') {
+                                document.getElementById('recgsm').className = 'recgsm_0_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == '1') {
+                                document.getElementById('recgsm').className = 'recgsm_1_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == '2') {
+                                document.getElementById('recgsm').className = 'recgsm_2_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == '3') {
+                                document.getElementById('recgsm').className = 'recgsm_3_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == '4') {
+                                document.getElementById('recgsm').className = 'recgsm_4_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == '5') {
+                                document.getElementById('recgsm').className = 'recgsm_5_ok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k0') {
+                                document.getElementById('recgsm').className = 'recgsm_0_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k1') {
+                                document.getElementById('recgsm').className = 'recgsm_1_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k2') {
+                                document.getElementById('recgsm').className = 'recgsm_2_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k3') {
+                                document.getElementById('recgsm').className = 'recgsm_3_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k4') {
+                                document.getElementById('recgsm').className = 'recgsm_4_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'k5') {
+                                document.getElementById('recgsm').className = 'recgsm_5_nok';
+                            } else if (getXMLValue(xmlData, 'recgsm') == 'missing') {
+                                document.getElementById('recgsm').className = 'recgsm_off';
+                            }
+
+                            // Axis cameras status 
+                            if (getXMLValue(xmlData, 'camera') == 'ok') {
+                                document.getElementById('camera').className = 'camera_ok';
+                            } else if (getXMLValue(xmlData, 'camera') == 'ko') {
+                                document.getElementById('camera').className = 'camera_ko';
+                            } else if (getXMLValue(xmlData, 'camera') == 'disabled') {
+                                document.getElementById('camera').className = 'no_camera';
+                            }
+                        }
+                        setTimeout("newAJAXCommand('/status.xml', updateStatus, true, '')", 500);
+                    </script>
+                    <div id="pictobar">
+                        <!-- group A -->
+                        <div id="zone0" class="zone_dis">&nbsp;</div>
+                        <!-- group B -->
+                        <div id="zone1" class="zone_dis">&nbsp;</div>
+                        <!-- group C -->
+                        <div id="zone2" class="zone_dis">&nbsp;</div>
+                        <!-- Battery default -->
+                        <div id="defaut0" class="defaut_dis">&nbsp;</div>
+                        <!-- Communication default -->
+                        <div id="defaut1" class="defaut_dis">&nbsp;</div>
+                        <!-- Door default -->
+                        <div id="defaut2" class="defaut_dis">&nbsp;</div>
+                        <!-- House default -->
+                        <div id="defaut3" class="defaut_dis">&nbsp;</div>
+                        <!-- Box open default -->
+                        <div id="defaut4" class="defaut_dis">&nbsp;</div>
+                        <!-- GSM radio reception level indicator -->
+                        <div id="recgsm" class="defaut_dis">&nbsp;</div>
+                        <!-- Axis Camera status -->
+                        <div id="camera" class="camera_disabled">&nbsp;</div>
+                    </div>
+                </div>
+                <div id="content" class="contentall">
+                    <div id="itemlistcolumnlegend"></div>
+                    <div id="itemlist">
+                        <script type="text/javascript">
+                            var item_type = ["typetrans", "typedm", "typedm", "typedm", "typekeyb", "typesirenint", "typebadgerfid", "typedo", "typedo", "typedo", "typedo", "typedo", "typedo", "typedovitre", "typedo", "typebadgerfid", "typedo", "typesirenext"];
+                            var item_label = ["Tr Tél", "DM", "DM", "DM", "Cl lcd", "Sir int", "Badge", "DO", "DO", "DO", "DO", "DO", "DO", "DO vitre", "DO", "Badge", "DO", "Sir ext"];
+                            var item_pause = ["running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running", "running"];
+                            var elt_name = ["RELAI TEL", "RADAR ETAGE", "RADAR GARAGE", "RADAR SALON", "CLAVIER LCD", "SIRENE INT", "BADGE NOIR CED", "BUREAU", "CHAMBRE C&L", "BAIE JARDIN", "BAIE TERRASSE", "SALON", "FENET CUISINE", "PORTE SERVICE", "PORTE CUISINE", "BADGE BLANC LL", "PORTE ENTREE", "SIRENE EXT"];
+                            var elt_code = ["621133", "237998", "238006", "237995", "802606", "656232", "792177", "309928", "383897", "383908", "383918", "309932", "309935", "395774", "315287", "792249", "309951", "489319"];
+                            var elt_pile = ["itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itemhidden", "itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itembattok", "itemhidden", "itembattok", "itembattok"];
+                            var elt_as = ["itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemhidden", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemboxok", "itemhidden", "itemboxok", "itemboxok"];
+                            var elt_maison = ["itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok", "itemhouseok"];
+                            var elt_onde = ["itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemhidden", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemcomok", "itemhidden", "itemcomok", "itemcomok"];
+                            var elt_porte = ["itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemhidden", "itemdoorok", "itemdoorok", "itemdoorok", "itemdoorok", "itemdoorok", "itemdoorok", "itemdoorok", "itemdoorok", "itemhidden", "itemdoorok", "itemhidden"];
+                            var elt_zone = ["SYS", "B (f)", "B (f)", "AT (f)", "SYS", "SYS", "SYS", "C (f)", "C (f)", "C (f)", "C (f)", "C (f)", "C (f)", "C (f)", "B (f)", "SYS", "AT (f)", "SYS"];
+
+                            var i = 0;
+                            for (i = 0; i < 18; i++) {
+                                document.write("<div class=\"item\">");
+                                document.write("<div class=\"" + item_type[i] + "\">" + item_label[i] + "<div class=\"" + item_pause[i] + "\">&nbsp;</div></div>");
+                                document.write("<div class=\"iteminfo\">");
+                                document.write(elt_name[i] + "<br />" + elt_code[i]);
+                                document.write("</div>");
+                                /* Battery */
+                                document.write("<div class=\"" + elt_pile[i] + "\">&nbsp;</div>");
+                                /* Comm */
+                                document.write("<div class=\"" + elt_onde[i] + "\">&nbsp;</div>");
+                                /* Door */
+                                document.write("<div class=\"" + elt_porte[i] + "\">&nbsp;</div>");
+                                /* House */
+                                document.write("<div class=\"" + elt_maison[i] + "\">&nbsp;</div>");
+                                /* Box */
+                                document.write("<div class=\"" + elt_as[i] + "\">&nbsp;</div>");
+                                /* Zone */
+                                document.write("<div class=\"itemgroup\">" + elt_zone[i] + "</div>");
+                                document.write("</div>");
+                            }
+                        </script>
+                    </div>
+                    <div class="textcontent">
+                        <script language="javascript">
+                            <!-- 
+                            function popupcentree(page, largeur, hauteur, options) {
+                                var top = (screen.height - hauteur) / 2;
+                                var left = (screen.width - largeur) / 2;
+                                window.open(page, "", "top=" + top + ",left=" + left + ",width=" + largeur + ",height=" + hauteur + "," + options);
+                            }
+                            --> 
+                        </script>
+                        <input type="button" name="btn_print" value="Imprimer" class="arrowlite" onClick='popupcentree("u_plistelmt.htm",485,600,"menubar=no,scrollbars=yes,statusbar=no");'>
+                    </div>
+                    <div class="textcontent">
+                        <div class="textcontenttitle">Effacement des défauts</div>
+                        <form method="post" action="u_listelmt.htm" name="u_listelmt_efface">
+                            <input type="submit" name="btn_del_pil" value="Piles" class="arrowlite"/>
+                            &nbsp;<input type="submit" name="btn_del_lia" value="Liaisons" class="arrowlite"/>
+                            &nbsp;<input type="submit" name="btn_del_alm" value="Alarmes" class="arrowlite"/>
+                        </form>
+                    </div>
+                    <div id="content_footer">&nbsp;</div>
+                </div>
+                <!--content -->
+                <div id="spacer">
+                <!-- -->
+                <!--[if IE]>&nbsp;
+          <![endif]-->
+                </div>
+                <div id="menu_footer">Copyright &copy;2013 Somfy
+        </div>
+            </div>
+            <!-- fond -->
+        </div>
+        <!-- page -->
+    </body>
+</html>

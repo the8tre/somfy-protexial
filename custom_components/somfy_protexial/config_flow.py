@@ -21,6 +21,7 @@ from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
+    SelectOptionDict,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -34,8 +35,10 @@ from .const import (
     CONF_CODE,
     CONF_CODES,
     CONF_HOME_ZONES,
+    CONF_MONITORED_ELEMENTS,
     CONF_NIGHT_ZONES,
     DOMAIN,
+    ELEMENT_TRANSLATIONS,
     Zone,
 )
 from .protexial import SomfyProtexial
@@ -47,6 +50,10 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     MINOR_VERSION = 3
 
+    def __init__(self) -> None:
+        self.protexial = None
+        self.config_data = {}
+
     async def async_step_user(self, user_input):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
@@ -54,11 +61,14 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             parts = urlparse(user_input[CONF_URL])
-            self.url = f"{parts.scheme}://{parts.netloc}"
+            url = f"{parts.scheme}://{parts.netloc}"
+            self.config_data[CONF_URL] = url
             session = aiohttp_client.async_create_clientsession(self.hass)
-            self.protexial = SomfyProtexial(session, self.url)
+            self.protexial = SomfyProtexial(session, url)
             try:
-                self.api_type = await self.protexial.guess_and_set_api_type()
+                self.config_data[CONF_API_TYPE] = (
+                    await self.protexial.guess_and_set_api_type()
+                )
                 challenge = await self.protexial.get_challenge()
                 return await self.async_step_login(None, challenge)
             except Exception as e:
@@ -67,22 +77,27 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema({vol.Required(CONF_URL): cv.string}),
+            data_schema=vol.Schema(
+                {vol.Required(CONF_URL, default="http://192.168.1.147"): cv.string}
+            ),
             errors=errors,
         )
 
     async def async_step_login(self, user_input, challenge=None):
         errors = {}
         if user_input is not None:
-            self.code = user_input[CONF_CODE]
-            self.username = user_input[CONF_USERNAME]
-            self.password = user_input[CONF_PASSWORD]
-
+            code = user_input[CONF_CODE]
+            username = user_input[CONF_USERNAME]
+            password = user_input[CONF_PASSWORD]
             try:
-                self.codes = await self.protexial.get_challenge_card(
-                    self.username, self.password, self.code
+                codes = await self.protexial.get_challenge_card(
+                    username, password, code
                 )
-                self.version = await self.protexial.get_version()
+                self.config_data[ATTR_SW_VERSION] = await self.protexial.get_version()
+                self.config_data[CONF_USERNAME] = username
+                self.config_data[CONF_PASSWORD] = password
+                self.config_data[CONF_CODES] = codes
+                self.protexial.update_credentials(username, password, codes)
 
                 return await self.async_step_config(None)
             except Exception as e:
@@ -98,7 +113,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_USERNAME, default="u"): cv.string,
-                    vol.Required(CONF_PASSWORD): cv.string,
+                    vol.Required(CONF_PASSWORD, default="3056"): cv.string,
                     vol.Required(CONF_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)
                     ),
@@ -122,23 +137,12 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 errors["base"] = "same_zones"
             else:
-                night_zones = int(user_input[CONF_NIGHT_ZONES])
-                home_zones = int(user_input[CONF_HOME_ZONES])
-                return self.async_create_entry(
-                    title=self.url,
-                    data={
-                        CONF_URL: self.url,
-                        CONF_API_TYPE: self.api_type,
-                        CONF_USERNAME: self.username,
-                        CONF_PASSWORD: self.password,
-                        CONF_CODES: self.codes,
-                        CONF_NIGHT_ZONES: night_zones,
-                        CONF_HOME_ZONES: home_zones,
-                        CONF_ARM_CODE: arm_code,
-                        CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
-                        ATTR_SW_VERSION: self.version,
-                    },
-                )
+                self.config_data[CONF_ARM_CODE] = arm_code
+                self.config_data[CONF_NIGHT_ZONES] = int(user_input[CONF_NIGHT_ZONES])
+                self.config_data[CONF_HOME_ZONES] = int(user_input[CONF_HOME_ZONES])
+                self.config_data[CONF_SCAN_INTERVAL] = user_input[CONF_SCAN_INTERVAL]
+
+                return await self.async_step_elements(None)
 
         return self.async_show_form(
             step_id="config",
@@ -171,6 +175,54 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_SCAN_INTERVAL, default=60): NumberSelector(
                         NumberSelectorConfig(
                             mode=NumberSelectorMode.BOX, min=15, max=3600, step=1
+                        )
+                    ),
+                }
+            ),
+        )
+
+    async def async_step_elements(self, user_input):
+        errors = {}
+        if user_input is not None:
+            self.config_data[CONF_MONITORED_ELEMENTS] = user_input[
+                CONF_MONITORED_ELEMENTS
+            ]
+            return self.async_create_entry(
+                title=self.config_data[CONF_URL],
+                data=self.config_data,
+            )
+
+        elements_data = await self.protexial.get_elements_status()
+        options = []
+        defaults = []
+        for element in elements_data:
+            if element["elt_pile"] is None:
+                continue
+            defaults.append(element["elt_code"])
+            label = ELEMENT_TRANSLATIONS[element["item_type"]]
+            label += (
+                "" if len(element["elt_name"]) == 0 else f" - {element['elt_name']}"
+            )
+            options.append(
+                SelectOptionDict(
+                    value=element["elt_code"],
+                    label=label,
+                )
+            )
+
+        return self.async_show_form(
+            step_id="elements",
+            errors=errors,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_MONITORED_ELEMENTS, default=defaults
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=options,
+                            mode=SelectSelectorMode.LIST,
+                            multiple=True,
+                            translation_key="elements",
                         )
                     ),
                 }

@@ -23,6 +23,11 @@
           "arm_code": "Code d'armement à 4 chiffres optionnel",
           "scan_interval": "Interval de rafraîchissement (secondes)"
         }
+      },
+      "elements": {
+        "data": {
+          "monitored_elements": "Choisissez les élements à monitorer"
+        }
       }
     },
     "error": {

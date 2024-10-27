@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response>
+
+<zone0>off</zone0>
+<zone1>off</zone1>
+<zone2>off</zone2>
+
+<defaut0>ok</defaut0>
+<defaut1>ok</defaut1>
+<defaut2>ok</defaut2>
+<defaut3>ok</defaut3>
+<defaut4>ok</defaut4>
+
+<gsm>GSM connecté au réseau</gsm>
+<recgsm>4</recgsm>
+<opegsm>"Orange</opegsm>
+<camera>ko</camera>
+</response>

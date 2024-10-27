@@ -12,6 +12,7 @@ CONF_MODES = "modes"
 CONF_ARM_CODE = "arm_code"
 CONF_NIGHT_ZONES = "night_zones"
 CONF_HOME_ZONES = "home_zones"
+CONF_MONITORED_ELEMENTS = "monitored_elements"
 
 API = "api"
 COORDINATOR = "coordinator"
@@ -68,6 +69,92 @@ class Selector(str, Enum):
     FOOTER = "footer"
     CHALLENGE_CARD = "challenge_card"
 
+
+ELEMENT_TRANSLATIONS = {
+    "typetrans": "☎️ Transmetteur téléphonique",
+    "typekeyb": "⌨️ Clavier",
+    "typesirenint": "🚨 Sirène intérieure",
+    "typetecfumee": "💨 Détecteur de fumée",
+    "typedm": "🏃 Détecteur de mouvement",
+    "typeremotemulti": "Télécommande",
+    "typesirenext": "🚨 Sirène extérieure",
+    "typedo": "🚪 Détecteur d'ouverture",
+    "typedovitre": "🪟 Détecteur d'ouverture vitre",
+    "typebadgerfid": "🪪 Badge RFID",
+}
+
+ELEMENT_DESCRIPTORS = {
+    "typetrans": {"sensors": ["battery"], "name": "Transmetteur téléphonique"},
+    "typekeyb": {"sensors": ["battery"], "name": "Clavier"},
+    "typesirenint": {"sensors": ["battery"], "name": "Sirène intérieure"},
+    "typesirenext": {"sensors": ["battery"], "name": "Sirène extérieure"},
+    "typetecfumee": {"sensors": ["battery", "smoke"], "name": "Détecteur de fumée"},
+    "typedm": {"sensors": ["battery", "motion"], "name": "Détecteur de mouvement"},
+    "typedo": {"sensors": ["battery", "opening"], "name": "Détecteur d'ouverture"},
+    "typedovitre": {
+        "sensors": ["battery", "window"],
+        "name": "Détecteur d'ouverture vitre",
+    },
+}
+
+ELEMENT_ENTITY = {
+    "battery": {
+        "type": "battery",
+        "data_field": "elt_pile",
+        "name": "Batterie",
+        "device_class": BinarySensorDeviceClass.BATTERY,
+        "entity_category": EntityCategory.DIAGNOSTIC,
+        "icon_on": "mdi:battery-alert",
+        "icon_off": "mdi:battery",
+        "on_if": False,
+        "state_on": "Faible",
+        "state_off": "ok",
+    },
+    "smoke": {
+        "type": "smoke",
+        "data_field": "elt_porte",
+        "name": "Fumée",
+        "device_class": BinarySensorDeviceClass.SMOKE,
+        "icon_on": "mdi:smoke-detector-variant-alert",
+        "icon_off": "mdi:smoke-detector-variant",
+        "on_if": False,
+        "state_on": "Détectée",
+        "state_off": "Non détectée",
+    },
+    "motion": {
+        "type": "motion",
+        "data_field": "elt_porte",
+        "name": "Mouvement",
+        "device_class": BinarySensorDeviceClass.MOTION,
+        "icon_on": "mdi:motion-sensor",
+        "icon_off": "mdi:motion-sensor-off",
+        "on_if": False,
+        "state_on": "Détectée",
+        "state_off": "Non détectée",
+    },
+    "opening": {
+        "type": "opening",
+        "data_field": "elt_porte",
+        "name": "Ouverture",
+        "device_class": BinarySensorDeviceClass.OPENING,
+        "icon_on": "mdi:door-open",
+        "icon_off": "mdi:door-closed",
+        "on_if": False,
+        "state_on": "Ouvert",
+        "state_off": "Fermé",
+    },
+    "window": {
+        "type": "window",
+        "data_field": "elt_porte",
+        "name": "Vitre",
+        "device_class": BinarySensorDeviceClass.WINDOW,
+        "icon_on": "mdi:window-open",
+        "icon_off": "mdi:window-closed",
+        "on_if": False,
+        "state_on": "Ouvert",
+        "state_off": "Fermé",
+    },
+}
 
 BINARY_SENSORS = [
     {

@@ -24,6 +24,11 @@
           "arm_code": "Optional 4 digits arm code",
           "scan_interval": "Scan interval (seconds)"
         }
+      },
+      "elements": {
+        "data": {
+          "monitored_elements": "Choose elements to monitor"
+        }
       }
     },
     "error": {
