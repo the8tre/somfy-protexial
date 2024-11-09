@@ -4,15 +4,10 @@ import logging
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
+    AlarmControlPanelState,
     CodeFormat,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_DISARMED,
-)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -73,7 +68,6 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             self.modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
         self.arm_code = arm_code
         self._changed_by = None
-        self._attr_state = self.__getCurrentState()
 
     @property
     def name(self):
@@ -107,9 +101,13 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         """Return the last change triggered by."""
         return self._changed_by
 
+    @property
+    def alarm_state(self) -> AlarmControlPanelState | None:
+        """Return the state of the alarm."""
+        return self.__getCurrentState()
+
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._attr_state = self.__getCurrentState()
         self.async_write_ha_state()
 
     def __getCurrentState(self):
@@ -122,16 +120,18 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             active_zones += Zone.C.value
 
         if active_zones == Zone.NONE.value:
-            return STATE_ALARM_DISARMED
+            return AlarmControlPanelState.DISARMED
 
         if active_zones == Zone.ABC.value:
-            return STATE_ALARM_ARMED_AWAY
+            return AlarmControlPanelState.ARMED_AWAY
 
         if active_zones == self.night_zones:
-            return STATE_ALARM_ARMED_NIGHT
+            return AlarmControlPanelState.ARMED_NIGHT
 
         if active_zones == self.home_zones:
-            return STATE_ALARM_ARMED_HOME
+            return AlarmControlPanelState.ARMED_HOME
+
+        return AlarmControlPanelState.UNKNOWN
 
     async def async_alarm_disarm(self, code=None):
         self.check_arm_code(code)
