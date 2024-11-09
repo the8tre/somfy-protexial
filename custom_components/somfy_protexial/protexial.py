@@ -247,7 +247,7 @@ class SomfyProtexial:
     async def do_guess_get(self, page) -> str:
         try:
             async with asyncio.timeout(HTTP_TIMEOUT):
-                _LOGGER.debug(f"Guess {self.url + page}")
+                _LOGGER.debug(f"Guess '{self.url + page}'")
                 response = await self.session.get(
                     self.url + page, headers={}, allow_redirects=False
                 )
@@ -261,25 +261,25 @@ class SomfyProtexial:
                 raise SomfyException("Unavailable, please retry later")
             # Looks like another model
         except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
-                page,
-                exception,
-            )
             raise SomfyException(
-                f"Timeout error fetching information from {page} - {exception}"
-            )
+                f"Timeout error fetching from '{self.url + page}'"
+            ) from exception
         except ClientError as exception:
+            raise SomfyException(
+                f"Error fetching from '{self.url + page}'"
+            ) from exception
+        except UnicodeDecodeError as exception:
             _LOGGER.error(
-                "Error fetching information from %s - %s",
-                page,
+                "Incompatible encoding found in '%s' - %s", self.url + page, exception
+            )
+        except SomfyException:
+            raise
+        except Exception as exception:
+            _LOGGER.error(
+                "Something really wrong happened when fetching from '%s' ! - %s",
+                self.url + page,
                 exception,
             )
-            raise SomfyException(
-                f"Error fetching information from {page} - {exception}"
-            )
-        except Exception as exception:
-            _LOGGER.error("Something really wrong happened! - %s", exception)
         return None
 
     async def get_challenge(self):

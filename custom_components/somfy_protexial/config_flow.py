@@ -47,13 +47,22 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     MINOR_VERSION = 3
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.url = None
+        self.api_type = None
+        self.protexial = None
+        self.code = None
+        self.username = None
+        self.password = None
+
     async def async_step_user(self, user_input):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
 
         errors = {}
         if user_input is not None:
-            parts = urlparse(user_input[CONF_URL])
+            parts = urlparse(user_input[CONF_URL].strip())
             self.url = f"{parts.scheme}://{parts.netloc}"
             session = aiohttp_client.async_create_clientsession(self.hass)
             self.protexial = SomfyProtexial(session, self.url)
@@ -62,7 +71,7 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 challenge = await self.protexial.get_challenge()
                 return await self.async_step_login(None, challenge)
             except Exception as e:
-                _LOGGER.error(e)
+                _LOGGER.exception(e)
                 errors["base"] = "connection"
 
         return self.async_show_form(
