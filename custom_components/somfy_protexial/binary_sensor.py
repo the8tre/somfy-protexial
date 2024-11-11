@@ -56,12 +56,14 @@ class ProtexialBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def state(self):
         if self.is_on:
             return self.sensor["state_on"]
-        else:
-            return self.sensor["state_off"]
+        return self.sensor["state_off"]
 
     @property
     def device_class(self) -> BinarySensorDeviceClass:
         self.sensor["device_class"]
 
-    def __getCurrentState(self):
-        return self.coordinator.data[self.sensor["id"]] == self.sensor["on_if"]
+    def __getCurrentState(self) -> bool:
+        value = self.coordinator.data[self.sensor["id"]]
+        if "on_if" in self.sensor:
+            return value == self.sensor["on_if"]
+        return value != self.sensor["off_if"]
