@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - master
+      - fix-wrong-states
 jobs:
   draft_release:
     name: Release Drafter

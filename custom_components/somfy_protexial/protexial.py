@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+import string
 from urllib.parse import urlencode
 from xml.etree import ElementTree as ET
 
@@ -15,6 +16,8 @@ from .somfy_exception import SomfyException
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
+_PRINTABLE_CHARS = set(string.printable)
+
 
 class Status:
     zoneA = "off"
@@ -25,10 +28,10 @@ class Status:
     door = "ok"
     alarm = "ok"
     box = "ok"
-    gsm = "GSM connecté au réseau"
+    gsm = "gsm connect au rseau"
     recgsm = "4"
-    opegsm = "Orange"
-    camera = "Disabled"
+    opegsm = "orange"
+    camera = "disabled"
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -319,32 +322,40 @@ class SomfyProtexial:
         response = ET.fromstring(content)
         status = Status()
         for child in response:
+            filteredChildText = self.filter_ascii(child.text)
             match child.tag:
                 case "defaut0":
-                    status.battery = child.text
+                    status.battery = filteredChildText
                 case "defaut1":
-                    status.radio = child.text
+                    status.radio = filteredChildText
                 case "defaut2":
-                    status.door = child.text
+                    status.door = filteredChildText
                 case "defaut3":
-                    status.alarm = child.text
+                    status.alarm = filteredChildText
                 case "defaut4":
-                    status.box = child.text
+                    status.box = filteredChildText
                 case "zone0":
-                    status.zoneA = child.text
+                    status.zoneA = filteredChildText
                 case "zone1":
-                    status.zoneB = child.text
+                    status.zoneB = filteredChildText
                 case "zone2":
-                    status.zoneC = child.text
+                    status.zoneC = filteredChildText
                 case "gsm":
-                    status.gsm = child.text
+                    status.gsm = filteredChildText
                 case "recgsm":
-                    status.recgsm = child.text
+                    status.recgsm = filteredChildText
                 case "opegsm":
-                    status.opegsm = child.text
+                    status.opegsm = filteredChildText
                 case "camera":
-                    status.camera = child.text
+                    status.camera = filteredChildText
         return status
+
+    def filter_ascii(self, value) -> str:
+        if value is None:
+            return value
+        filtered = "".join(filter(lambda x: x in _PRINTABLE_CHARS, value))
+        _LOGGER.debug("Filtered status: '%s'", filtered.lower())
+        return filtered.lower()
 
     async def get_challenge_card(self, username, password, code):
         await self.__login(username, password, code)
