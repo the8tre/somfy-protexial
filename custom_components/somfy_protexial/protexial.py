@@ -12,6 +12,7 @@ from .const import CHALLENGE_REGEX, HTTP_TIMEOUT, ApiType, Page, Selector, Somfy
 from .protexial_api import ProtexialApi
 from .protexial_io_api import ProtexialIOApi
 from .protexiom_api import ProtexiomApi
+from .protexiom_alt_api import ProtexiomAltApi
 from .somfy_exception import SomfyException
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
@@ -212,11 +213,18 @@ class SomfyProtexial:
             return ProtexialIOApi()
         elif api_type == ApiType.PROTEXIOM:
             return ProtexiomApi()
+        elif api_type == ApiType.PROTEXIOM_ALT:
+            return ProtexiomAltApi()
         elif api_type is not None:
             raise SomfyException(f"Unknown api type: {type}")
 
     async def guess_and_set_api_type(self):
-        for api_type in [ApiType.PROTEXIAL_IO, ApiType.PROTEXIAL, ApiType.PROTEXIOM]:
+        for api_type in [
+            ApiType.PROTEXIAL_IO,
+            ApiType.PROTEXIAL,
+            ApiType.PROTEXIOM,
+            ApiType.PROTEXIOM_ALT,
+        ]:
             self.api = self.load_api(api_type)
             has_version_page = False
             # Some older systems don't have a version page

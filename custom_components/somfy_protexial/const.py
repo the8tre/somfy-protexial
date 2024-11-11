@@ -47,6 +47,7 @@ class ApiType(str, Enum):
     PROTEXIAL = "protexial"
     PROTEXIOM = "protexiom"
     PROTEXIAL_IO = "protexial_io"
+    PROTEXIOM_ALT = "protexiom_alt"
 
 
 class Page(str, Enum):
