@@ -11,8 +11,8 @@ from pyquery import PyQuery as pq
 from .const import CHALLENGE_REGEX, HTTP_TIMEOUT, ApiType, Page, Selector, SomfyError
 from .protexial_api import ProtexialApi
 from .protexial_io_api import ProtexialIOApi
-from .protexiom_api import ProtexiomApi
 from .protexiom_alt_api import ProtexiomAltApi
+from .protexiom_api import ProtexiomApi
 from .somfy_exception import SomfyException
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
