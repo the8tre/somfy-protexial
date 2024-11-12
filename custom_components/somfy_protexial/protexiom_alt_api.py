@@ -17,7 +17,7 @@ class ProtexiomAltApi(AbstractApi):
         }
         self.selectors = {
             Selector.CONTENT_TYPE: "meta[http-equiv='content-type']",
-            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(3) td:nth-child(1)",
+            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1)",
             Selector.ERROR_CODE: "#infobox b",
             Selector.FOOTER: "[id^='menu_footer']",
             Selector.CHALLENGE_CARD: "td:not([class])",

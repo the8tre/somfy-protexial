@@ -246,7 +246,8 @@ class SomfyProtexial:
                     )
                     # Check if the challenge element is present
                     if challenge_element is not None:
-                        challenge = challenge_element.text()
+                        # Challenge should be exactly 2 characters long
+                        challenge = challenge_element.text()[-2:]
                         # Check that the challenge element looks fine
                         if re.match(CHALLENGE_REGEX, challenge):
                             self.api_type = api_type
@@ -298,9 +299,9 @@ class SomfyProtexial:
         dom = pq(await login_response.text(self.api.get_encoding()))
         challenge_element = dom(self.api.get_selector(Selector.LOGIN_CHALLENGE))
         if challenge_element:
-            return challenge_element.text()
-        else:
-            raise SomfyException("Challenge not found")
+            # Challenge is exactly 2 characters long
+            return challenge_element.text()[-2:]
+        raise SomfyException("Challenge not found")
 
     async def __login(self, username=None, password=None, code=None):
         self.cookie = None
