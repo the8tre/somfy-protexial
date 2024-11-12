@@ -10,7 +10,7 @@ class ProtexiomAltApi(AbstractApi):
             Page.PILOTAGE: "/u_pilotage.htm",
             Page.STATUS: "/status.xml",
             Page.ERROR: "/error.htm",
-            Page.ELEMENTS: "/u_listelmt.htm",
+            Page.ELEMENTS: "/u_plistelmt.htm",
             Page.CHALLENGE_CARD: "/u_print.htm",
             Page.VERSION: None,
             Page.DEFAULT: "/default.htm",
@@ -24,7 +24,7 @@ class ProtexiomAltApi(AbstractApi):
         }
         self.encoding = "iso-8859-15"
 
-    def login(self, username, password, code):
+    def get_login_payload(self, username, password, code):
         return {
             "login": username,
             "password": password,
@@ -32,10 +32,10 @@ class ProtexiomAltApi(AbstractApi):
             "action": "Connexion",
         }
 
-    def reset_session(self):
+    def get_reset_session_payload(self):
         return {"action": "OK"}
 
-    def arm(self, zone):
+    def get_arm_payload(self, zone):
         value = ""
         match zone:
             case Zone.A:
@@ -49,29 +49,20 @@ class ProtexiomAltApi(AbstractApi):
 
         return {"hidden": "hidden", "zone": value}
 
-    def disarm(self):
+    def get_disarm_payload(self):
         return {"hidden": "hidden", "zone": "Arrêt A B C"}
 
-    def turn_light_on(self):
+    def get_turn_light_on_payload(self):
         return {"hidden": "hidden", "action_lum": "ON"}
 
-    def turn_light_off(self):
+    def get_turn_light_off_payload(self):
         return {"hidden": "hidden", "action_lum": "OFF"}
 
-    def open_cover(self):
+    def get_open_cover_payload(self):
         return {"hidden": "hidden", "action_vol_montee": ""}
 
-    def close_cover(self):
+    def get_close_cover_payload(self):
         return {"hidden": "hidden", "action_vol_descente": ""}
 
-    def stop_cover(self):
+    def get_stop_cover_payload(self):
         return {"hidden": "hidden", "action_vol_stop": ""}
-
-    def reset_battery_status(self):
-        return {"btn_del_pil": "Piles"}
-
-    def reset_link_status(self):
-        return {"btn_del_lia": "Liaisons"}
-
-    def reset_alarm_status(self):
-        return {"btn_del_alm": "Alarmes"}
