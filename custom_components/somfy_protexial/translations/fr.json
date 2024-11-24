@@ -1,7 +1,5 @@
 {
   "config": {
-    "administrator": "administrateur",
-    "standard": "utilisateur",
     "step": {
       "user": {
         "description": "Saisissez l'URL de l'interface web locale de votre centrale",

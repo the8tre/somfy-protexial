@@ -1,7 +1,5 @@
 {
   "config": {
-    "administrator": "administrator",
-    "standard": "user",
     "step": {
       "user": {
         "description": "Provide your Protexial central local web interface URL",
