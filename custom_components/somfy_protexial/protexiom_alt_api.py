@@ -24,6 +24,9 @@ class ProtexiomAltApi(AbstractApi):
         }
         self.encoding = "iso-8859-15"
 
+    def requires_admin(self) -> bool:
+        return True
+
     def get_login_payload(self, username, password, code):
         return {
             "login": username,

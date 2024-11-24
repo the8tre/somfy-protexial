@@ -1,5 +1,7 @@
 {
   "config": {
+    "administrator": "administrator",
+    "standard": "user",
     "step": {
       "user": {
         "description": "Provide your Protexial central local web interface URL",
@@ -8,10 +10,22 @@
           "single_instance_allowed": "Single instane allowed"
         }
       },
-      "login": {
-        "description": "Provide code for challenge {challenge}",
+      "admin_login": {
+        "description": "Administrator authentication.\nProvide code for challenge {challenge}.",
         "data": {
-          "username": "Username",
+          "password": "Password",
+          "code": "Code"
+        }
+      },
+      "user_login": {
+        "description": "Standard user authentication.",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "login": {
+        "description": "Standard user authentication.\nProvide code for challenge {challenge}.",
+        "data": {
           "password": "Password",
           "code": "Code"
         }

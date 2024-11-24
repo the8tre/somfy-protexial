@@ -209,14 +209,15 @@ class SomfyProtexial:
     def load_api(self, api_type: ApiType):
         if api_type == ApiType.PROTEXIAL:
             return ProtexialApi()
-        elif api_type == ApiType.PROTEXIAL_IO:
+        if api_type == ApiType.PROTEXIAL_IO:
             return ProtexialIOApi()
-        elif api_type == ApiType.PROTEXIOM:
+        if api_type == ApiType.PROTEXIOM:
             return ProtexiomApi()
-        elif api_type == ApiType.PROTEXIOM_ALT:
+        if api_type == ApiType.PROTEXIOM_ALT:
             return ProtexiomAltApi()
-        elif api_type is not None:
+        if api_type is not None:
             raise SomfyException(f"Unknown api type: {type}")
+        return None
 
     async def guess_and_set_api_type(self):
         for api_type in [
@@ -318,6 +319,11 @@ class SomfyProtexial:
             "post", Page.LOGIN, data=form, retry=False, login=False
         )
         self.cookie = login_response.headers.get("SET-COOKIE")
+
+    def set_credentials(self, username, password, codes):
+        self.username = username
+        self.password = password
+        self.codes = codes
 
     async def logout(self):
         await self.__do_call("get", Page.LOGOUT, retry=False, login=False)

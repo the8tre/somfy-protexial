@@ -17,6 +17,9 @@ class AbstractApi(ABC):
     def get_encoding(self):
         return self.encoding
 
+    def requires_admin(self) -> bool:
+        return False
+
     @abstractmethod
     def get_login_payload(self, username, password, code):
         pass
