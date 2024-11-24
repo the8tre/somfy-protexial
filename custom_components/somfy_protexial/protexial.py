@@ -107,9 +107,11 @@ class SomfyProtexial:
                         method, page, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == self.api.get_page(Page.ERROR):
-                    dom = pq(await response.text(self.api.get_encoding()))
+                    errorPageContent = await response.text(self.api.get_encoding())
+                    dom = pq(errorPageContent)
                     error_element = dom(self.api.get_selector(Selector.ERROR_CODE))
                     if not error_element:
+                        _LOGGER.error(errorPageContent)
                         raise SomfyException("Unknown error")
                     errorCode = error_element.text()
                     if (
@@ -147,6 +149,7 @@ class SomfyProtexial:
                     elif errorCode == SomfyError.UNKNOWN_PARAMETER:
                         raise SomfyException("Command failed: Unknown parameter")
                     else:
+                        _LOGGER.error(errorPageContent)
                         raise SomfyException(
                             f"Command failed: Unknown errorCode: {errorCode}"
                         )
