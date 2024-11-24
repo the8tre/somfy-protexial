@@ -11,7 +11,7 @@ class ProtexiomAltApi(AbstractApi):
             Page.STATUS: "/status.xml",
             Page.ERROR: "/error.htm",
             Page.ELEMENTS: "/u_plistelmt.htm",
-            Page.CHALLENGE_CARD: "/u_print.htm",
+            Page.CHALLENGE_CARD: "/a_print.htm",
             Page.VERSION: None,
             Page.DEFAULT: "/default.htm",
         }
