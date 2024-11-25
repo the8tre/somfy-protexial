@@ -45,6 +45,7 @@
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
         "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.codeActionsOnSave": {
@@ -59,4 +60,3 @@
     "ghcr.io/devcontainers/features/rust:1": {}
   }
 }
-
