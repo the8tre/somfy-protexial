@@ -1,31 +1,22 @@
 # Comment développer cette intégration
 
-Pré-requis:
+## Pré-requis:
 - Visual Studio Code
 - Docker desktop
 
-## Configurer l'environnement de développement HA dans VS Code
-Visual Studio Code + devcontainer: https://developers.home-assistant.io/docs/development_environment#developing-with-visual-studio-code--devcontainer
+## Préparer l'environnement
+1. Fork le repository [`somfy-protexial`](https://github.com/the8tre/somfy-protexial)
+2. Clone le repository en local
+3. Ouvrir le repository avec VSCode
+  - Quand le repository est ouvert dans VSCode il propose **Reopen in container**. Cela lance la construction du container.
+  - Si cette notification ne s'affiche pas ouvrir la palette de commande et lancer **Dev Containers: Reopen in Container**
 
-## Fork + Clone le repository somfy-protexial en local
-- Comme par exemple dans: `/Users/Vous/dev/somfy-protexial`
+Si VSCode n'arrive pas à résoudre les dépendances dans les imports des fichiers Python, ouvrir la paleztte de commande et lancer **Python Debugger: Clear Cache and Reload Window**
 
-## Monter l'intégration dans le container de dev
-- Dans VS Code localiser le fichier `.devcontainer/devcontainer.json`</br>
-![](assets/devcontainer_location.png)
-- Y ajouter le point de montage et re-construire le cotainer
-```json
-{
-  "name": "Home Assistant Dev",
-  ...
-  "mounts": [
-    "source=/Users/Vous/dev/somfy-protexial/custom_components/somfy_protexial,target=/workspaces/core/config/custom_components/somfy_protexial,type=bind,consistency=cached"
-  ],
-  ...
-}
-```
-## Editer et debugger
-- Les fichiers de l'intégration sont maintenant disponibles dnas le container
+## Lancer Home Assistant
+1. Ouvrir la palette de commandes et chercher **Tasks: Run Task**
+2. Lancer la task **Run Home Assistant on port 8123**
 
-![](assets//mount_done.png)
-- L'intégration peut être débuggée directement comme le reste de HA
+## Debugger l'intégration
+1. Home Assistant doit être en train de tourner
+2. Exécuter le profile de lancement **debugpy: Attach Local**
