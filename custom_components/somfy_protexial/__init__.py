@@ -2,8 +2,8 @@
 Somfy Protexial
 """
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
 from homeassistant.config_entries import ConfigEntry
@@ -16,11 +16,16 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import aiohttp_client, device_registry as dr
+from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
+from custom_components.somfy_protexial.retryable_somfy_exception import (
+    RetryableSomfyException,
+)
 
 from .const import (
     API,
@@ -35,7 +40,7 @@ from .const import (
     ApiType,
     Zone,
 )
-from .protexial import SomfyProtexial
+from .protexial import SomfyProtexial, Status
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,11 +63,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data.setdefault(DOMAIN, {})
 
     session = aiohttp_client.async_create_clientsession(hass)
-    _LOGGER.debug(f"CONF_URL:{entry.data.get(CONF_URL)}")
-    _LOGGER.debug(f"CONF_API_TYPE:{entry.data.get(CONF_API_TYPE)}")
-    _LOGGER.debug(f"CONF_USERNAME:{entry.data.get(CONF_USERNAME)}")
-    _LOGGER.debug(f"CONF_PASSWORD:{entry.data.get(CONF_PASSWORD)}")
-    _LOGGER.debug(f"CONF_CODES:{entry.data.get(CONF_CODES)}")
+    _LOGGER.debug("CONF_URL: %s", entry.data.get(CONF_URL))
+    _LOGGER.debug("CONF_API_TYPE: %s", entry.data.get(CONF_API_TYPE))
+    _LOGGER.debug("CONF_USERNAME: %s", entry.data.get(CONF_USERNAME))
+    _LOGGER.debug("CONF_PASSWORD: %s", entry.data.get(CONF_PASSWORD))
+    _LOGGER.debug("CONF_CODES: %s", entry.data.get(CONF_CODES))
 
     protexial = SomfyProtexial(
         session=session,
@@ -75,20 +80,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await protexial.init()
 
-    async def _get_status():
-        try:
-            status = await protexial.get_status()
-            _LOGGER.debug(status)
-        except Exception as err:
-            raise UpdateFailed(f"Error communicating with API: {err}")
-        return status
-
-    coordinator = DataUpdateCoordinator(
+    coordinator = ProtexialCoordinator(
         hass,
-        _LOGGER,
-        name="Somfy Protexial status update",
-        update_method=_get_status,
-        update_interval=timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL)),
+        protexial=protexial,
+        refresh_interval=entry.data.get(CONF_SCAN_INTERVAL),
     )
 
     device_registry = dr.async_get(hass)
@@ -188,3 +183,39 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle an options update."""
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+class ProtexialCoordinator(DataUpdateCoordinator):
+    """My custom coordinator."""
+
+    def __init__(
+        self, hass: HomeAssistant, protexial: SomfyProtexial, refresh_interval: float
+    ):
+        """Initialize my coordinator."""
+        super().__init__(
+            hass,
+            _LOGGER,
+            name="Somfy Protexial status",
+            update_interval=timedelta(seconds=refresh_interval),
+            always_update=True,
+        )
+        self.protexial = protexial
+
+    async def _async_update_data(self):
+        try:
+            status = await self.protexial.get_status()
+            status.error_count = 0
+            _LOGGER.debug(status)
+            return status
+        except RetryableSomfyException as err:
+            _LOGGER.error("Retryable error raised %s", err)
+            self.data.error_count += 1
+            if self.data.error_count > 2:
+                _LOGGER.error("Too many retries: %d", self.data.error_count)
+                empty_status = Status()
+                empty_status.error_count = self.data.error_count
+                return empty_status
+            _LOGGER.error("Will retry and return last known data")
+            return self.data
+        except Exception as err:
+            raise UpdateFailed("Error communicating with API") from err

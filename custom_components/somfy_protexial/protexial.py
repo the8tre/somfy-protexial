@@ -8,6 +8,10 @@ from xml.etree import ElementTree as ET
 from aiohttp import ClientError, ClientSession
 from pyquery import PyQuery as pq
 
+from custom_components.somfy_protexial.retryable_somfy_exception import (
+    RetryableSomfyException,
+)
+
 from .const import CHALLENGE_REGEX, HTTP_TIMEOUT, ApiType, Page, Selector, SomfyError
 from .protexial_api import ProtexialApi
 from .protexial_io_api import ProtexialIOApi
@@ -20,18 +24,19 @@ _PRINTABLE_CHARS = set(string.printable)
 
 
 class Status:
-    zoneA = "off"
-    zoneB = "off"
-    zoneC = "off"
-    battery = "ok"
-    radio = "ok"
-    door = "ok"
-    alarm = "ok"
-    box = "ok"
-    gsm = "gsm connect au rseau"
-    recgsm = "4"
-    opegsm = "orange"
-    camera = "disabled"
+    zoneA = None  # on | off
+    zoneB = None  # on | off
+    zoneC = None  # on | off
+    battery = None  # ok | nok
+    radio = None  # ok | nok
+    door = None  # ok | nok
+    alarm = None  # ok | nok
+    box = None  # ok | nok
+    gsm = None  # gsm connect au rseau | module gsm absent
+    recgsm = None  # 0-n | missing
+    opegsm = None  # - | orange | sfr | bouygues | free ...
+    camera = None  # disabled | enabled
+    error_count = 0
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -80,22 +85,24 @@ class SomfyProtexial:
             if data:
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
 
+            response = None
             async with asyncio.timeout(HTTP_TIMEOUT):
-                _LOGGER.debug(f"Call to: {full_path}")
+                _LOGGER.debug("Call to: %s", full_path)
                 if method == "get":
                     response = await self.session.get(full_path, headers=headers)
                 elif method == "post":
-                    encodedData = urlencode(data, encoding=self.api.get_encoding())
-                    _LOGGER.debug(f"With payload: {data}")
-                    _LOGGER.debug(f"With payload (encoded): {encodedData}")
+                    encoded_data = urlencode(data, encoding=self.api.get_encoding())
+                    _LOGGER.debug("With payload: %s", data)
+                    _LOGGER.debug("With payload (encoded): %s", encoded_data)
                     response = await self.session.post(
-                        self.url + path, data=encodedData, headers=headers
+                        self.url + path, data=encoded_data, headers=headers
                     )
-            _LOGGER.debug(f"Response path: {response.real_url.path}")
-            _LOGGER.debug(f"Response headers: {response.headers}")
-            _LOGGER.debug(
-                f"Response body: {await response.text(self.api.get_encoding())}"
-            )
+            if response is not None:
+                _LOGGER.debug("Response path: %s", response.real_url.path)
+                _LOGGER.debug("Response headers: %s", response.headers)
+                _LOGGER.debug(
+                    "Response body: %s", {await response.text(self.api.get_encoding())}
+                )
 
             if response.status == 200:
                 if (
@@ -107,15 +114,15 @@ class SomfyProtexial:
                         method, page, headers, data, retry=False, login=False
                     )
                 elif response.real_url.path == self.api.get_page(Page.ERROR):
-                    errorPageContent = await response.text(self.api.get_encoding())
-                    dom = pq(errorPageContent)
+                    error_page_content = await response.text(self.api.get_encoding())
+                    dom = pq(error_page_content)
                     error_element = dom(self.api.get_selector(Selector.ERROR_CODE))
                     if not error_element:
-                        _LOGGER.error(errorPageContent)
+                        _LOGGER.error(error_page_content)
                         raise SomfyException("Unknown error")
-                    errorCode = error_element.text()
+                    error_code = error_element.text()
                     if (
-                        errorCode == SomfyError.NOT_AUTHORIZED
+                        error_code == SomfyError.NOT_AUTHORIZED
                         and not self.cookie
                         and retry is True
                     ):
@@ -123,7 +130,7 @@ class SomfyProtexial:
                         return await self.__do_call(
                             method, page, headers, data, retry=False, login=False
                         )
-                    elif errorCode == SomfyError.SESSION_ALREADY_OPEN:
+                    elif error_code == SomfyError.SESSION_ALREADY_OPEN:
                         if retry:
                             form = self.api.get_reset_session_payload()
                             await self.__do_call(
@@ -140,45 +147,40 @@ class SomfyProtexial:
                             )
                         else:
                             raise SomfyException("Too many login retries")
-                    elif errorCode == SomfyError.WRONG_CREDENTIALS:
+                    elif error_code == SomfyError.WRONG_CREDENTIALS:
                         raise SomfyException("Login failed: Wrong credentials")
-                    elif errorCode == SomfyError.MAX_LOGIN_ATTEMPS:
+                    elif error_code == SomfyError.MAX_LOGIN_ATTEMPS:
                         raise SomfyException("Login failed: Max attempt count reached")
-                    elif errorCode == SomfyError.WRONG_CODE:
+                    elif error_code == SomfyError.WRONG_CODE:
                         raise SomfyException("Login failed: Wrong code")
-                    elif errorCode == SomfyError.UNKNOWN_PARAMETER:
+                    elif error_code == SomfyError.UNKNOWN_PARAMETER:
                         raise SomfyException("Command failed: Unknown parameter")
                     else:
-                        _LOGGER.error(errorPageContent)
+                        _LOGGER.error(
+                            "An unknonw error code was returned: %s", error_code
+                        )
+                        _LOGGER.error(
+                            "Please report it with the page content below to the developer https://github.com/the8tre/somfy-protexial/issues"
+                        )
+                        _LOGGER.error(error_page_content)
                         raise SomfyException(
-                            f"Command failed: Unknown errorCode: {errorCode}"
+                            f"Command failed: Unknown errorCode: {error_code}"
                         )
                 else:
                     return response
             else:
                 raise SomfyException(f"Http error ({response.status})")
         except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
-                path,
-                exception,
-            )
-            raise SomfyException(
-                f"Timeout error fetching information from {full_path} - {exception}"
-            )
+            raise RetryableSomfyException(
+                f"Timeout error fetching information from {full_path}"
+            ) from exception
 
         except ClientError as exception:
-            _LOGGER.error(
-                "Error fetching information from %s - %s",
-                path,
-                exception,
-            )
             raise SomfyException(
-                f"Error fetching information from {path} - {exception}"
-            )
+                f"ClientError fetching information from {full_path}"
+            ) from exception
         except Exception as exception:  # pylint: disable=broad-except
-            _LOGGER.error("Something really wrong happened! - %s", exception)
-            raise SomfyException(f"Something really wrong happened! - {exception}")
+            raise SomfyException("Something really wrong happened!") from exception
 
     async def init(self):
         await self.__login()
@@ -222,17 +224,18 @@ class SomfyProtexial:
         for api_type in [ApiType.PROTEXIAL_IO, ApiType.PROTEXIAL, ApiType.PROTEXIOM]:
             self.api = self.load_api(api_type)
             has_version_page = False
+            version_body = None
             # Some older systems don't have a version page
-            versionPage = self.api.get_page(Page.VERSION)
-            if versionPage is not None:
+            version_page = self.api.get_page(Page.VERSION)
+            if version_page is not None:
                 has_version_page = True
-                version_body = await self.do_guess_get(versionPage)
+                version_body = await self.do_guess_get(version_page)
 
             # Either the system doesn't have a version page, or the page was successfully retrieved
             if not has_version_page or version_body is not None:
                 # Now check the login page
-                loginPage = self.api.get_page(Page.LOGIN)
-                login_body = await self.do_guess_get(loginPage)
+                login_page = self.api.get_page(Page.LOGIN)
+                login_body = await self.do_guess_get(login_page)
                 if login_body is not None:
                     # The system has a login page
                     dom = pq(login_body)
@@ -247,21 +250,19 @@ class SomfyProtexial:
                             self.api_type = api_type
                             return self.api_type
                         else:
-                            _LOGGER.debug(f"Challenge not recognized: {challenge}")
+                            _LOGGER.debug("Challenge not recognized: %s", challenge)
         raise SomfyException("Couldn't detect the centrale type")
 
     async def do_guess_get(self, page) -> str:
         try:
             async with asyncio.timeout(HTTP_TIMEOUT):
-                _LOGGER.debug(f"Guess '{self.url + page}'")
+                _LOGGER.debug("Guess '%s'", self.url + page)
                 response = await self.session.get(
                     self.url + page, headers={}, allow_redirects=False
                 )
             if response.status == 200:
                 response_body = await response.text(self.api.get_encoding())
-                _LOGGER.debug(
-                    f"Guess response: {await response.text(self.api.get_encoding())}"
-                )
+                _LOGGER.debug("Guess response: %s", response_body)
                 return response_body
             elif response.status == 302:
                 raise SomfyException("Unavailable, please retry later")
@@ -317,7 +318,7 @@ class SomfyProtexial:
         await self.__do_call("get", Page.LOGOUT, retry=False, login=False)
         self.cookie = None
 
-    async def get_status(self):
+    async def get_status(self) -> Status:
         status_response = await self.__do_call(
             "get", Page.STATUS, login=False, authenticated=False
         )
@@ -325,39 +326,38 @@ class SomfyProtexial:
         response = ET.fromstring(content)
         status = Status()
         for child in response:
-            filteredChildText = self.filter_ascii(child.text)
+            filtered_child_text = self.filter_ascii(child.text)
             match child.tag:
                 case "defaut0":
-                    status.battery = filteredChildText
+                    status.battery = filtered_child_text
                 case "defaut1":
-                    status.radio = filteredChildText
+                    status.radio = filtered_child_text
                 case "defaut2":
-                    status.door = filteredChildText
+                    status.door = filtered_child_text
                 case "defaut3":
-                    status.alarm = filteredChildText
+                    status.alarm = filtered_child_text
                 case "defaut4":
-                    status.box = filteredChildText
+                    status.box = filtered_child_text
                 case "zone0":
-                    status.zoneA = filteredChildText
+                    status.zoneA = filtered_child_text
                 case "zone1":
-                    status.zoneB = filteredChildText
+                    status.zoneB = filtered_child_text
                 case "zone2":
-                    status.zoneC = filteredChildText
+                    status.zoneC = filtered_child_text
                 case "gsm":
-                    status.gsm = filteredChildText
+                    status.gsm = filtered_child_text
                 case "recgsm":
-                    status.recgsm = filteredChildText
+                    status.recgsm = filtered_child_text
                 case "opegsm":
-                    status.opegsm = filteredChildText
+                    status.opegsm = filtered_child_text
                 case "camera":
-                    status.camera = filteredChildText
+                    status.camera = filtered_child_text
         return status
 
     def filter_ascii(self, value) -> str:
         if value is None:
             return value
         filtered = "".join(filter(lambda x: x in _PRINTABLE_CHARS, value))
-        _LOGGER.debug("Filtered status: '%s'", filtered.lower())
         return filtered.lower()
 
     async def get_challenge_card(self, username, password, code):
