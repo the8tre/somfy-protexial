@@ -122,7 +122,10 @@ class SomfyProtexial:
                         return await self.__do_call(
                             method, page, headers, data, retry=False, login=False
                         )
-                    elif errorCode == SomfyError.SESSION_ALREADY_OPEN:
+                    elif (
+                        errorCode == SomfyError.SESSION_ALREADY_OPEN
+                        or errorCode == SomfyError.UNEXPECTED_ERROR
+                    ):
                         if retry:
                             form = self.api.get_reset_session_payload()
                             await self.__do_call(

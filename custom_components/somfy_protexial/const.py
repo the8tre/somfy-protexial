@@ -30,6 +30,7 @@ class SomfyError(str, Enum):
     SESSION_ALREADY_OPEN = "(0x0902)"
     NOT_AUTHORIZED = "(0x0903)"
     UNKNOWN_PARAMETER = "(0x1003)"
+    UNEXPECTED_ERROR = "(0x0000)"
 
 
 class Zone(Enum):
