@@ -27,6 +27,11 @@ class ProtexiomAltApi(AbstractApi):
     def requires_admin(self) -> bool:
         return True
 
+    def is_page_authenticated(self, page) -> bool:
+        if page == Page.STATUS:
+            return True
+        return super().is_page_authenticated(page)
+
     def get_login_payload(self, username, password, code):
         return {
             "login": username,

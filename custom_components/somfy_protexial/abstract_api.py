@@ -20,6 +20,9 @@ class AbstractApi(ABC):
     def requires_admin(self) -> bool:
         return False
 
+    def is_page_authenticated(self, page) -> bool:
+        return False
+
     @abstractmethod
     def get_login_payload(self, username, password, code):
         pass

@@ -4,4 +4,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-ruff check . --fix
+isort --trailing-comma -m 3 --profile black ./custom_components/somfy_protexial/

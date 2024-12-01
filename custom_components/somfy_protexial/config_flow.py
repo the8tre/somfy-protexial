@@ -3,8 +3,6 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
-import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import (
     ATTR_SW_VERSION,
@@ -27,6 +25,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
     TextSelectorType,
 )
+import voluptuous as vol
 
 from .const import (
     ALL_ZONES,

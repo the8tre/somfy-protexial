@@ -106,11 +106,22 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         """Return the state of the alarm."""
         return self.__getCurrentState()
 
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        if (
+            self.coordinator.data.zoneA is None
+            or self.coordinator.data.zoneB is None
+            or self.coordinator.data.zoneC is None
+        ):
+            return False
+        return super().available
+
     @callback
     def _handle_coordinator_update(self) -> None:
         self.async_write_ha_state()
 
-    def __getCurrentState(self):
+    def __getCurrentState(self) -> AlarmControlPanelState | None:
         active_zones = Zone.NONE.value
         if self.coordinator.data.zoneA == "on":
             active_zones += Zone.A.value
@@ -131,7 +142,7 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         if active_zones == self.home_zones:
             return AlarmControlPanelState.ARMED_HOME
 
-        return AlarmControlPanelState.UNKNOWN
+        return None
 
     async def async_alarm_disarm(self, code=None):
         self.check_arm_code(code)
