@@ -25,6 +25,8 @@
       "extensions": [
         "charliermarsh.ruff",
         "ms-python.pylint",
+        "ms-python.isort",
+        "mikoz.black-py",
         "ms-python.vscode-pylance",
         "visualstudioexptteam.vscodeintellicode",
         "redhat.vscode-yaml",
@@ -47,11 +49,15 @@
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
         "[python]": {
-          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.defaultFormatter": "mikoz.black-py",
           "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
           },
         },
+        "isort.args": [
+          "--profile",
+          "black"
+        ],
       }
     }
   },

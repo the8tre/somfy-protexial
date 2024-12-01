@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - master
+      - alternative-protexiom
 jobs:
   draft_release:
     name: Release Drafter

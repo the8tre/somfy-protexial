@@ -55,6 +55,8 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.code = None
         self.username = None
         self.password = None
+        self.codes = None
+        self.version = None
 
     async def async_step_user(self, user_input):
         if self._async_current_entries():
@@ -69,6 +71,8 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 self.api_type = await self.protexial.guess_and_set_api_type()
                 challenge = await self.protexial.get_challenge()
+                if self.protexial.api.requires_admin():
+                    return await self.async_step_admin_login(None, challenge)
                 return await self.async_step_login(None, challenge)
             except Exception as e:
                 _LOGGER.exception(e)
@@ -80,11 +84,71 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_admin_login(self, user_input, challenge=None):
+        errors = {}
+        if user_input is not None:
+            self.code = user_input[CONF_CODE]
+            self.username = "a"
+            self.password = user_input[CONF_PASSWORD]
+
+            try:
+                self.codes = await self.protexial.get_challenge_card(
+                    self.username, self.password, self.code
+                )
+                self.version = await self.protexial.get_version()
+                await self.protexial.logout()
+
+                return await self.async_step_user_login(None)
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "auth"
+
+        if challenge is None:
+            challenge = await self.protexial.get_challenge()
+
+        return self.async_show_form(
+            step_id="admin_login",
+            description_placeholders={"challenge": challenge},
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): cv.string,
+                    vol.Required(CONF_CODE): TextSelector(
+                        TextSelectorConfig(type=TextSelectorType.PASSWORD)
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_user_login(self, user_input, challenge=None):
+        errors = {}
+        if user_input is not None:
+            self.username = "u"
+            self.password = user_input[CONF_PASSWORD]
+
+            try:
+                self.protexial.set_credentials(self.username, self.password, self.codes)
+                self.protexial.init()
+                return await self.async_step_config(None)
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "auth"
+
+        return self.async_show_form(
+            step_id="user_login",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): cv.string,
+                }
+            ),
+            errors=errors,
+        )
+
     async def async_step_login(self, user_input, challenge=None):
         errors = {}
         if user_input is not None:
             self.code = user_input[CONF_CODE]
-            self.username = user_input[CONF_USERNAME]
+            self.username = "u"
             self.password = user_input[CONF_PASSWORD]
 
             try:
@@ -106,7 +170,6 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={"challenge": challenge},
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_USERNAME, default="u"): cv.string,
                     vol.Required(CONF_PASSWORD): cv.string,
                     vol.Required(CONF_CODE): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.PASSWORD)

@@ -7,10 +7,22 @@
           "url": "URL"
         }
       },
-      "login": {
-        "description": "Saisissez le code pour le challenge {challenge}",
+      "admin_login": {
+        "description": "Authentification administrateur.\nSaisissez le code pour le challenge {challenge}.",
         "data": {
-          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "code": "Code"
+        }
+      },
+      "user_login": {
+        "description": "Authentification utilisateur standard.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      },
+      "login": {
+        "description": "Authentification utilisateur standard.\nSaisissez le code pour le challenge {challenge}.",
+        "data": {
           "password": "Mot de passe",
           "code": "Code"
         }
