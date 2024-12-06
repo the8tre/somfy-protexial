@@ -328,7 +328,10 @@ class SomfyProtexial:
 
     async def do_get_status(self, login_and_authenticated=False) -> Status:
         status_response = await self.__do_call(
-            "get", Page.STATUS, login=login_and_authenticated, authenticated=login_and_authenticated
+            "get",
+            Page.STATUS,
+            login=login_and_authenticated,
+            authenticated=login_and_authenticated
         )
         content = await status_response.text(self.api.get_encoding())
         status = self.extract_status(content)
