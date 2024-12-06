@@ -319,10 +319,22 @@ class SomfyProtexial:
         self.cookie = None
 
     async def get_status(self) -> Status:
+        status = await self.do_get_status()
+        if status.zoneA is None and status.zoneB is None and status.zoneC is None:
+            # It seems the centrale doesn't return the status anylonger: Time to re-login
+            await self.logout()
+            status = await self.do_get_status(True)
+        return status
+
+    async def do_get_status(self, login_and_authenticated=False) -> Status:
         status_response = await self.__do_call(
-            "get", Page.STATUS, login=False, authenticated=False
+            "get", Page.STATUS, login=login_and_authenticated, authenticated=login_and_authenticated
         )
         content = await status_response.text(self.api.get_encoding())
+        status = self.extract_status(content)
+        return status
+
+    def extract_status(self, content) -> Status:
         response = ET.fromstring(content)
         status = Status()
         for child in response:

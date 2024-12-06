@@ -9,5 +9,5 @@
   "issue_tracker": "https://github.com/the8tre/somfy-protexial/issues",
   "loggers": ["custom_components.somfy_protexial"],
   "requirements": ["pyquery==2.0.0"],
-  "version": "1.2.5-rc1"
+  "version": "1.2.5-rc2"
 }
