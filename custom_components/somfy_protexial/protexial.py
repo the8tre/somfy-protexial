@@ -331,7 +331,7 @@ class SomfyProtexial:
             "get",
             Page.STATUS,
             login=login_and_authenticated,
-            authenticated=login_and_authenticated
+            authenticated=login_and_authenticated,
         )
         content = await status_response.text(self.api.get_encoding())
         status = self.extract_status(content)

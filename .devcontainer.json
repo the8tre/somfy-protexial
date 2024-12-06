@@ -25,6 +25,7 @@
       "extensions": [
         "ms-python.pylint",
         "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
         "visualstudioexptteam.vscodeintellicode",
         "redhat.vscode-yaml",
         "esbenp.prettier-vscode",
