@@ -24,9 +24,9 @@ _PRINTABLE_CHARS = set(string.printable)
 
 
 class Status:
-    zoneA = None  # on | off
-    zoneB = None  # on | off
-    zoneC = None  # on | off
+    zone_a = None  # on | off
+    zone_b = None  # on | off
+    zone_c = None  # on | off
     battery = None  # ok | nok
     radio = None  # ok | nok
     door = None  # ok | nok
@@ -42,7 +42,7 @@ class Status:
         return getattr(self, key)
 
     def __str__(self):
-        return f"zoneA:{self.zoneA}, zoneB:{self.zoneB}, zoneC:{self.zoneC}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
+        return f"zoneA:{self.zone_a}, zoneB:{self.zone_b}, zoneC:{self.zone_c}, battery:{self.battery}, radio:{self.radio}, door:{self.door}, alarm:{self.alarm}, box:{self.box}, gsm:{self.gsm}, recgsm:{self.recgsm}, opegsm:{self.opegsm}, camera:{self.camera}"
 
 
 class SomfyProtexial:
@@ -320,7 +320,7 @@ class SomfyProtexial:
 
     async def get_status(self) -> Status:
         status = await self.do_get_status()
-        if status.zoneA is None and status.zoneB is None and status.zoneC is None:
+        if status.zone_a is None and status.zone_b is None and status.zone_c is None:
             # It seems the centrale doesn't return the status anylonger: Time to re-login
             _LOGGER.debug("Centrale returns empty statuse. Forcing re-login + Retry")
             await self.logout()
@@ -355,11 +355,11 @@ class SomfyProtexial:
                 case "defaut4":
                     status.box = filtered_child_text
                 case "zone0":
-                    status.zoneA = filtered_child_text
+                    status.zone_a = filtered_child_text
                 case "zone1":
-                    status.zoneB = filtered_child_text
+                    status.zone_b = filtered_child_text
                 case "zone2":
-                    status.zoneC = filtered_child_text
+                    status.zone_c = filtered_child_text
                 case "gsm":
                     status.gsm = filtered_child_text
                 case "recgsm":

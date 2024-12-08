@@ -110,9 +110,9 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
     def available(self) -> bool:
         """Return True if entity is available."""
         if (
-            self.coordinator.data.zoneA is None
-            or self.coordinator.data.zoneB is None
-            or self.coordinator.data.zoneC is None
+            self.coordinator.data.zone_a is None
+            or self.coordinator.data.zone_b is None
+            or self.coordinator.data.zone_c is None
         ):
             return False
         return super().available
@@ -123,11 +123,11 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
 
     def __getCurrentState(self) -> AlarmControlPanelState | None:
         active_zones = Zone.NONE.value
-        if self.coordinator.data.zoneA == "on":
+        if self.coordinator.data.zone_a == "on":
             active_zones += Zone.A.value
-        if self.coordinator.data.zoneB == "on":
+        if self.coordinator.data.zone_b == "on":
             active_zones += Zone.B.value
-        if self.coordinator.data.zoneC == "on":
+        if self.coordinator.data.zone_c == "on":
             active_zones += Zone.C.value
 
         if active_zones == Zone.NONE.value:
