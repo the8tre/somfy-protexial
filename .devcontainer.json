@@ -23,9 +23,9 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "charliermarsh.ruff",
         "ms-python.pylint",
         "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
         "visualstudioexptteam.vscodeintellicode",
         "redhat.vscode-yaml",
         "esbenp.prettier-vscode",
@@ -47,7 +47,6 @@
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
         "[python]": {
-          "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
           },
