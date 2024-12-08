@@ -322,6 +322,7 @@ class SomfyProtexial:
         status = await self.do_get_status()
         if status.zoneA is None and status.zoneB is None and status.zoneC is None:
             # It seems the centrale doesn't return the status anylonger: Time to re-login
+            _LOGGER.debug("Centrale returns empty statuse. Forcing re-login + Retry")
             await self.logout()
             status = await self.do_get_status(True)
         return status
