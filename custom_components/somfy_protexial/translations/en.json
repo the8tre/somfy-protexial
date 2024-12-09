@@ -62,5 +62,59 @@
         "5": "A + C"
       }
     }
+  },
+  "device": {
+    "somfy_protexial": {
+      "name": "Experimental Somfy Protexialllee"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "global_battery": {
+        "name": "Batteries"
+      },
+      "global_alarm": {
+        "name": "Alarm",
+        "state": {
+          "on": "Alarm triggered",
+          "off": "No alarm"
+        }
+      },
+      "global_opening": {
+        "name": "Door or window",
+        "state": {
+          "on": "Opened",
+          "off": "Closed"
+        }
+      },
+      "global_box": {
+        "name": "Box",
+        "state": {
+          "on": "Problem",
+          "off": "OK"
+        }
+      },
+      "global_radio": {
+        "name": "Radio communication",
+        "state": {
+          "on": "OK",
+          "off": "Problem"
+        }
+      },
+      "gsm": {
+        "name": "GSM communication",
+        "state": {
+          "on": "Connected",
+          "off": "Not connected"
+        }
+      },
+      "camera": {
+        "name": "Camera",
+        "state": {
+          "on": "Connected",
+          "off": "Not connected"
+        }
+      }
+    }
   }
 }

@@ -2,10 +2,12 @@
 Somfy Protexial
 """
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
+from homeassistant.components.alarm_control_panel.const import (
+    AlarmControlPanelEntityFeature,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_SW_VERSION,
@@ -16,9 +18,9 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import aiohttp_client, device_registry as dr
-from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 

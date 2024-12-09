@@ -1,5 +1,5 @@
-from functools import reduce
 import logging
+from functools import reduce
 
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
@@ -88,8 +88,7 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
         """Return one or more digits/characters."""
         if self.arm_code is None:
             return None
-        else:
-            return CodeFormat.NUMBER
+        return CodeFormat.NUMBER
 
     @property
     def code_arm_required(self) -> bool:
