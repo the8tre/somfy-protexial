@@ -1,0 +1,55 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "global_battery": {
+        "default": "mdi:battery",
+        "state": {
+          "on": "mdi:battery-alert",
+          "off": "mdi:battery"
+        }
+      },
+      "global_alarm": {
+        "default": "motion-sensor",
+        "state": {
+          "on": "motion-sensor",
+          "off": "mdi:motion-sensor-off"
+        }
+      },
+      "global_opening": {
+        "default": "mdi:door-open",
+        "state": {
+          "on": "mdi:door-open",
+          "off": "mdi:door-closed"
+        }
+      },
+      "global_box": {
+        "default": "mdi:door-open",
+        "state": {
+          "on": "mdi:alert-circle",
+          "off": "mdi:check-circle"
+        }
+      },
+      "global_radio": {
+        "default": "mdi:access-point",
+        "state": {
+          "on": "mdi:access-point",
+          "off": "mdi:access-point-off"
+        }
+      },
+      "gsm": {
+        "default": "mdi:cellphone",
+        "state": {
+          "on": "mdi:cellphone",
+          "off": "mdi:cellphone-off"
+        }
+      },
+      "camera": {
+        "default": "mdi:webcam",
+        "state": {
+          "on": "mdi:webcam",
+          "off": "mdi:webcam-off"
+        }
+      }
+    }
+  }
+}
