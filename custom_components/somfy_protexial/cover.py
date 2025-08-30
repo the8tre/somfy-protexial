@@ -1,20 +1,38 @@
 import logging
+from dataclasses import dataclass
 
 from homeassistant.components.cover import (
     CoverDeviceClass,
     CoverEntity,
+    CoverEntityDescription,
     CoverEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import API, DEVICE_INFO, DOMAIN
+from custom_components.somfy_protexial.protexial_entity import (
+    ProtexialBaseEntity,
+    ProtexialEntityDescription,
+)
+
+from .const import API, COORDINATOR, DOMAIN
 from .protexial import SomfyProtexial
 
-DEFAULT_COVER_NAME = "Volets"
-
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProtexialCoverEntityDescription(
+    ProtexialEntityDescription, CoverEntityDescription
+):
+    """Describes Cover entity."""
+
+
+COVER_DESCRIPTION = ProtexialCoverEntityDescription(
+    key="cover",
+    translation_key="cover",
+)
 
 
 async def async_setup_entry(
@@ -23,26 +41,18 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     api = hass.data[DOMAIN][config_entry.entry_id][API]
-    device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
     lights = []
-    lights.append(ProtexialCover(device_info, api))
+    lights.append(ProtexialCover(coordinator, config_entry, COVER_DESCRIPTION, api))
     async_add_entities(lights)
 
 
-class ProtexialCover(CoverEntity):
-    def __init__(self, device_info, api: SomfyProtexial) -> None:
-        super().__init__()
-        self._attr_unique_id = f"{DOMAIN}_control_cover"
-        self._attr_device_info = device_info
+class ProtexialCover(ProtexialBaseEntity, CoverEntity):
+    def __init__(
+        self, coordinator, config_entry, description, api: SomfyProtexial
+    ) -> None:
+        super().__init__(coordinator, config_entry, description)
         self.api = api
-
-    @property
-    def name(self):
-        return DEFAULT_COVER_NAME
-
-    @property
-    def icon(self):
-        return "mdi:roller-shade"
 
     @property
     def is_closed(self):

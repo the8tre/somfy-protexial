@@ -1,16 +1,39 @@
 import logging
+from dataclasses import dataclass
 
-from homeassistant.components.light import ColorMode, LightEntity
+from homeassistant.components.light import (
+    ColorMode,
+    LightEntity,
+    LightEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import API, DEVICE_INFO, DOMAIN
+from custom_components.somfy_protexial.protexial_entity import (
+    ProtexialBaseEntity,
+    ProtexialEntityDescription,
+)
+
+from .const import API, COORDINATOR, DOMAIN
 from .protexial import SomfyProtexial
 
 DEFAULT_LIGHT_NAME = "Lumières"
 
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProtexialCoverEntityDescription(
+    ProtexialEntityDescription, LightEntityDescription
+):
+    """Describes Light entity."""
+
+
+LIGHT_DESCRIPTION = ProtexialCoverEntityDescription(
+    key="light",
+    translation_key="light",
+)
 
 
 async def async_setup_entry(
@@ -19,28 +42,20 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     api = hass.data[DOMAIN][config_entry.entry_id][API]
-    device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
     lights = []
-    lights.append(ProtexialLight(device_info, api))
+    lights.append(ProtexialLight(coordinator, config_entry, LIGHT_DESCRIPTION, api))
     async_add_entities(lights)
 
 
-class ProtexialLight(LightEntity):
-    def __init__(self, device_info, api: SomfyProtexial) -> None:
-        super().__init__()
+class ProtexialLight(ProtexialBaseEntity, LightEntity):
+    def __init__(
+        self, coordinator, config_entry, description, api: SomfyProtexial
+    ) -> None:
+        super().__init__(coordinator, config_entry, description)
         self.api = api
-        self._attr_unique_id = f"{DOMAIN}_control_light"
-        self._attr_device_info = device_info
         self._changed_by = None
         self._state = False
-
-    @property
-    def name(self):
-        return DEFAULT_LIGHT_NAME
-
-    @property
-    def icon(self):
-        return "mdi:lightbulb-group"
 
     @property
     def is_on(self):

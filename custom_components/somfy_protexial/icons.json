@@ -1,5 +1,10 @@
 {
   "entity": {
+    "light": {
+      "light": {
+        "default": "mdi:lightbulb-group"
+      }
+    },
     "binary_sensor": {
       "global_battery": {
         "default": "mdi:battery",
@@ -9,9 +14,9 @@
         }
       },
       "global_alarm": {
-        "default": "motion-sensor",
+        "default": "mdi:motion-sensor",
         "state": {
-          "on": "motion-sensor",
+          "on": "mdi:motion-sensor",
           "off": "mdi:motion-sensor-off"
         }
       },

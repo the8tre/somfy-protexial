@@ -1,8 +1,12 @@
 import logging
+from dataclasses import dataclass
 from functools import reduce
 
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
+    AlarmControlPanelEntityDescription,
+)
+from homeassistant.components.alarm_control_panel.const import (
     AlarmControlPanelEntityFeature,
     AlarmControlPanelState,
     CodeFormat,
@@ -10,8 +14,13 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from custom_components.somfy_protexial.protexial_entity import (
+    ProtexialBaseEntity,
+    ProtexialEntityDescription,
+)
 
 from .const import (
     API,
@@ -19,7 +28,6 @@ from .const import (
     CONF_HOME_ZONES,
     CONF_NIGHT_ZONES,
     COORDINATOR,
-    DEVICE_INFO,
     DOMAIN,
     Zone,
 )
@@ -32,31 +40,56 @@ ALARM_STATE = None
 _LOGGER = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True, kw_only=True)
+class ProtexialAlarmControlPanelEntityDescription(
+    ProtexialEntityDescription, AlarmControlPanelEntityDescription
+):
+    """Describes Alarm Control Panel entity."""
+
+
+ALARM_CONTROL_PANEL_DESCRIPTION = ProtexialAlarmControlPanelEntityDescription(
+    key="alarm",
+    translation_key="alarm",
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
-    device_info = hass.data[DOMAIN][config_entry.entry_id][DEVICE_INFO]
     api = hass.data[DOMAIN][config_entry.entry_id][API]
     night_zones = config_entry.data.get(CONF_NIGHT_ZONES)
     home_zones = config_entry.data.get(CONF_HOME_ZONES)
     arm_code = config_entry.data.get(CONF_ARM_CODE)
     alarms = []
     alarms.append(
-        ProtexialAlarm(device_info, coordinator, api, night_zones, home_zones, arm_code)
+        ProtexialAlarm(
+            coordinator,
+            config_entry,
+            ALARM_CONTROL_PANEL_DESCRIPTION,
+            api,
+            night_zones,
+            home_zones,
+            arm_code,
+        )
     )
     async_add_entities(alarms)
 
 
-class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
+class ProtexialAlarm(ProtexialBaseEntity, AlarmControlPanelEntity):
     def __init__(
-        self, device_info, coordinator, api, night_zones, home_zones, arm_code
+        self,
+        coordinator,
+        config_entry,
+        description,
+        api,
+        night_zones,
+        home_zones,
+        arm_code,
     ) -> None:
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{DOMAIN}_control_alarm"
-        self._attr_device_info = device_info
+        super().__init__(coordinator, config_entry, description)
         self.coordinator = coordinator
         self.api = api
         self.night_zones = night_zones
@@ -68,11 +101,6 @@ class ProtexialAlarm(CoordinatorEntity, AlarmControlPanelEntity):
             self.modes.append(AlarmControlPanelEntityFeature.ARM_HOME)
         self.arm_code = arm_code
         self._changed_by = None
-
-    @property
-    def name(self):
-        """Return the name of the device."""
-        return DEFAULT_ALARM_NAME
 
     @property
     def icon(self):

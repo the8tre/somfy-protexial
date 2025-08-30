@@ -63,12 +63,22 @@
       }
     }
   },
-  "device": {
-    "somfy_protexial": {
-      "name": "Experimental Somfy Protexialllee"
-    }
-  },
   "entity": {
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarm"
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Blinds"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lights"
+      }
+    },
     "binary_sensor": {
       "global_battery": {
         "name": "Batteries"

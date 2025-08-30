@@ -4,13 +4,13 @@ Somfy Protexial
 
 import logging
 from datetime import timedelta
+from typing import Any
 
 from homeassistant.components.alarm_control_panel.const import (
     AlarmControlPanelEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    ATTR_SW_VERSION,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -19,8 +19,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -84,33 +82,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = ProtexialCoordinator(
         hass,
         protexial=protexial,
-        refresh_interval=entry.data.get(CONF_SCAN_INTERVAL),
-    )
-
-    device_registry = dr.async_get(hass)
-    device_registry.async_get_or_create(
-        config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, "centrale")},
-        connections={(CONNECTION_NETWORK_MAC, entry.data.get(CONF_URL))},
-        manufacturer="Somfy",
-        name="Somfy Protexial",
-        model="Protexial",
-        sw_version=entry.data.get(ATTR_SW_VERSION),
-    )
-
-    device_info = DeviceInfo(
-        identifiers={(DOMAIN, "centrale")},
-        connections={(CONNECTION_NETWORK_MAC, entry.data.get(CONF_URL))},
-        name="Somfy Protexial",
-        manufacturer="Somfy",
-        model="Protexial",
-        sw_version=entry.data.get(ATTR_SW_VERSION),
+        refresh_interval=entry.data.get(CONF_SCAN_INTERVAL)
+        or SCAN_INTERVAL.total_seconds(),
     )
 
     hass.data[DOMAIN][entry.entry_id] = {
         API: protexial,
         COORDINATOR: coordinator,
-        DEVICE_INFO: device_info,
     }
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
@@ -142,7 +120,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
     if config_entry.version == 1:
         applyMigration = False
-        new = None
+        new: dict[str, Any] = dict(config_entry.data)
         if config_entry.minor_version < 2:
             # In config version 1.1 only Protexial ApiType was supported
             # We can safely force the API to ApiType.PROTEXIAL
@@ -210,11 +188,11 @@ class ProtexialCoordinator(DataUpdateCoordinator):
             return status
         except RetryableSomfyException as err:
             _LOGGER.error("Retryable error raised %s", err)
-            self.data.error_count += 1
-            if self.data.error_count > 2:
-                _LOGGER.error("Too many retries: %d", self.data.error_count)
+            self.data["error_count"] += 1
+            if self.data["error_count"] > 2:
+                _LOGGER.error("Too many retries: %d", self.data["error_count"])
                 empty_status = Status()
-                empty_status.error_count = self.data.error_count
+                empty_status.error_count = self.data["error_count"]
                 return empty_status
             _LOGGER.error("Will retry and return last known data")
             return self.data
