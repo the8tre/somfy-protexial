@@ -20,7 +20,7 @@ CHALLENGE_REGEX = r"[A-F]{1}[1-5]{1}"
 HTTP_TIMEOUT = 10
 
 
-class SomfyError(str, Enum):
+class SomfyErrorCode(str, Enum):
     WRONG_CODE = "(0x0B00)"
     MAX_LOGIN_ATTEMPS = "(0x0904)"
     WRONG_CREDENTIALS = "(0x0812)"

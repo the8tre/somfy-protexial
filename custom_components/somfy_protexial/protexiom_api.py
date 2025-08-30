@@ -17,14 +17,14 @@ class ProtexiomApi(AbstractApi):
         }
         self.selectors = {
             Selector.CONTENT_TYPE: "meta[http-equiv='content-type']",
-            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1) b",
+            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1) b",  # noqa: E501
             Selector.ERROR_CODE: "#infobox b",
             Selector.FOOTER: "[id^='menu_footer']",
             Selector.CHALLENGE_CARD: "td:not([class])",
         }
         self.encoding = "iso-8859-15"
 
-    def get_login_payload(self, username, password, code):
+    def get_login_payload(self, username, password, code) -> dict:
         return {
             "login": username,
             "password": password,
@@ -32,10 +32,10 @@ class ProtexiomApi(AbstractApi):
             "action": "Connexion",
         }
 
-    def get_reset_session_payload(self):
+    def get_reset_session_payload(self) -> dict:
         return {"action": "OK"}
 
-    def get_arm_payload(self, zone):
+    def get_arm_payload(self, zone) -> dict:
         value = ""
         match zone:
             case Zone.A:
@@ -49,20 +49,20 @@ class ProtexiomApi(AbstractApi):
 
         return {"hidden": "hidden", "zone": value}
 
-    def get_disarm_payload(self):
+    def get_disarm_payload(self) -> dict:
         return {"hidden": "hidden", "zone": "Arrêt A B C"}
 
-    def get_turn_light_on_payload(self):
+    def get_turn_light_on_payload(self) -> dict:
         return {"hidden": "hidden", "action_lum": "ON"}
 
-    def get_turn_light_off_payload(self):
+    def get_turn_light_off_payload(self) -> dict:
         return {"hidden": "hidden", "action_lum": "OFF"}
 
-    def get_open_cover_payload(self):
+    def get_open_cover_payload(self) -> dict:
         return {"hidden": "hidden", "action_vol_montee": ""}
 
-    def get_close_cover_payload(self):
+    def get_close_cover_payload(self) -> dict:
         return {"hidden": "hidden", "action_vol_descente": ""}
 
-    def get_stop_cover_payload(self):
+    def get_stop_cover_payload(self) -> dict:
         return {"hidden": "hidden", "action_vol_stop": ""}

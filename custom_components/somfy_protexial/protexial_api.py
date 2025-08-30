@@ -17,14 +17,14 @@ class ProtexialApi(AbstractApi):
         }
         self.selectors = {
             Selector.CONTENT_TYPE: "meta[http-equiv='content-type']",
-            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1) b",
+            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1) b",  # noqa: E501
             Selector.ERROR_CODE: "#infobox b",
             Selector.FOOTER: "[id^='menu_footer']",
             Selector.CHALLENGE_CARD: "td:not([class])",
         }
         self.encoding = "iso-8859-15"
 
-    def get_login_payload(self, username, password, code):
+    def get_login_payload(self, username, password, code) -> dict:
         return {
             "login": username,
             "password": password,
@@ -32,37 +32,37 @@ class ProtexialApi(AbstractApi):
             "btn_login": "Connexion",
         }
 
-    def get_reset_session_payload(self):
+    def get_reset_session_payload(self) -> dict:
         return {"btn_ok": "OK"}
 
-    def get_arm_payload(self, zone):
-        btnZone = ""
+    def get_arm_payload(self, zone) -> dict:
+        btn_zone = ""
         match zone:
             case Zone.A:
-                btnZone = "btn_zone_on_A"
+                btn_zone = "btn_zone_on_A"
             case Zone.B:
-                btnZone = "btn_zone_on_B"
+                btn_zone = "btn_zone_on_B"
             case Zone.C:
-                btnZone = "btn_zone_on_C"
+                btn_zone = "btn_zone_on_C"
             case Zone.ABC:
-                btnZone = "btn_zone_on_ABC"
+                btn_zone = "btn_zone_on_ABC"
 
-        return {"hidden": "hidden", btnZone: "Marche"}
+        return {"hidden": "hidden", btn_zone: "Marche"}
 
-    def get_disarm_payload(self):
+    def get_disarm_payload(self) -> dict:
         return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
 
-    def get_turn_light_on_payload(self):
+    def get_turn_light_on_payload(self) -> dict:
         return {"hidden": "hidden", "btn_lum_on": "ON"}
 
-    def get_turn_light_off_payload(self):
+    def get_turn_light_off_payload(self) -> dict:
         return {"hidden": "hidden", "btn_lum_off": "OFF"}
 
-    def get_open_cover_payload(self):
+    def get_open_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_up": ""}
 
-    def get_close_cover_payload(self):
+    def get_close_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_down": ""}
 
-    def get_stop_cover_payload(self):
+    def get_stop_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_stop": ""}

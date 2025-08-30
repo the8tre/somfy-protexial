@@ -23,7 +23,7 @@ from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from custom_components.somfy_protexial.retryable_somfy_exception import (
-    RetryableSomfyException,
+    RetryableSomfyError,
 )
 
 from .const import (
@@ -114,40 +114,40 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
     if config_entry.version == 1:
-        applyMigration = False
+        apply_migration = False
         new: dict[str, Any] = dict(config_entry.data)
         if config_entry.minor_version < 2:
             # In config version 1.1 only Protexial ApiType was supported
             # We can safely force the API to ApiType.PROTEXIAL
             new = {**config_entry.data}
             new[CONF_API_TYPE] = ApiType.PROTEXIAL
-            applyMigration = True
+            apply_migration = True
 
         if config_entry.minor_version < 3:
             # 1.3 introduces CONF_NIGHT_ZONES and CONF_HOME_ZONES
             new = {**config_entry.data} if new is None else new
 
-            currentModes = config_entry.data[CONF_MODES]
-            hasNightMode = any(
-                m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in currentModes
+            current_modes = config_entry.data[CONF_MODES]
+            has_night_mode = any(
+                m == AlarmControlPanelEntityFeature.ARM_NIGHT for m in current_modes
             )
-            hasHomeMode = any(
-                m == AlarmControlPanelEntityFeature.ARM_HOME for m in currentModes
+            has_home_mode = any(
+                m == AlarmControlPanelEntityFeature.ARM_HOME for m in current_modes
             )
 
             new[CONF_NIGHT_ZONES] = (
-                Zone.A.value + Zone.B.value if hasNightMode else Zone.NONE.value
+                Zone.A.value + Zone.B.value if has_night_mode else Zone.NONE.value
             )
-            new[CONF_HOME_ZONES] = Zone.A.value if hasHomeMode else Zone.NONE.value
+            new[CONF_HOME_ZONES] = Zone.A.value if has_home_mode else Zone.NONE.value
             del new[CONF_MODES]
-            applyMigration = True
+            apply_migration = True
 
-        if applyMigration:
+        if apply_migration:
             hass.config_entries.async_update_entry(
                 config_entry, data=new, minor_version=3, version=1
             )
@@ -169,7 +169,7 @@ class ProtexialCoordinator(DataUpdateCoordinator):
 
     def __init__(
         self, hass: HomeAssistant, protexial: SomfyProtexial, refresh_interval: float
-    ):
+    ) -> None:
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -180,13 +180,13 @@ class ProtexialCoordinator(DataUpdateCoordinator):
         )
         self.protexial = protexial
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> Any:
         try:
             status = await self.protexial.get_status()
             status.error_count = 0
             _LOGGER.debug(status)
             return status
-        except RetryableSomfyException as err:
+        except RetryableSomfyError as err:
             _LOGGER.error("Retryable error raised %s", err)
             self.data["error_count"] += 1
             if self.data["error_count"] > 2:

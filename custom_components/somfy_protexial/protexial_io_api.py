@@ -24,7 +24,7 @@ class ProtexialIOApi(AbstractApi):
         }
         self.encoding = "utf-8"
 
-    def get_login_payload(self, username, password, code):
+    def get_login_payload(self, username, password, code) -> dict:
         return {
             "login": username,
             "password": password,
@@ -32,10 +32,10 @@ class ProtexialIOApi(AbstractApi):
             "btn_login": "Se connecter",
         }
 
-    def get_reset_session_payload(self):
+    def get_reset_session_payload(self) -> dict:
         return {"btn_ok": "OK"}
 
-    def get_arm_payload(self, zone):
+    def get_arm_payload(self, zone) -> dict | None:
         match zone:
             case Zone.A:
                 return {"hidden": "hidden", "btn_zone_on_A": "Marche A"}
@@ -46,20 +46,20 @@ class ProtexialIOApi(AbstractApi):
             case Zone.ABC:
                 return {"hidden": "hidden", "btn_zone_on_ABC": "Marche A B C"}
 
-    def get_disarm_payload(self):
+    def get_disarm_payload(self) -> dict:
         return {"hidden": "hidden", "btn_zone_off_ABC": "Arrêt A B C"}
 
-    def get_turn_light_on_payload(self):
+    def get_turn_light_on_payload(self) -> dict:
         return {"hidden": "hidden", "btn_lum_on": "ON"}
 
-    def get_turn_light_off_payload(self):
+    def get_turn_light_off_payload(self) -> dict:
         return {"hidden": "hidden", "btn_lum_off": "OFF"}
 
-    def get_open_cover_payload(self):
+    def get_open_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_up": ""}
 
-    def get_close_cover_payload(self):
+    def get_close_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_down": ""}
 
-    def get_stop_cover_payload(self):
+    def get_stop_cover_payload(self) -> dict:
         return {"hidden": "hidden", "btn_vol_stop": "Stop"}
