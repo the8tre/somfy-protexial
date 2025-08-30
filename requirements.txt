@@ -1,5 +1,5 @@
 colorlog==6.9.0
-homeassistant==2025.4.4
+homeassistant>2025.1
 pip>=25.2
 ruff==0.7.2
 isort>=5.13.2
