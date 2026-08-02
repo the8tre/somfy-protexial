@@ -14,7 +14,9 @@
 
 ## About
 
-🔀 This 2.0.x version is an **updated fork** of the original integration by [the8tre](https://github.com/the8tre), available [here](https://github.com/the8tre/somfy-protexial).
+🔀 This 2.0.x release includes all updates from the [fork](https://github.com/the8tre/somfy-protexial) **maintained by AuroreVgn**, based on the original integration by [the8tre](https://github.com/the8tre).
+
+**This will be the last update published in this repository. Please use [this repository](https://github.com/AuroreVgn/somfy-protexial) from now on.**
 
 The main objectives of this integration are to anticipate:
 
