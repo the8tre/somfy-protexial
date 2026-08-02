@@ -4,7 +4,8 @@
       "user": {
         "description": "Saisissez l'URL de l'interface web locale de votre centrale",
         "data": {
-          "url": "URL"
+          "url": "URL",
+          "single_instance_allowed": "Une seule instance autorisée"
         }
       },
       "login": {
@@ -15,13 +16,27 @@
           "code": "Code"
         }
       },
+      "admin_login": {
+        "description": "Saisissez le code correspondant au challenge {challenge}",
+        "data": {
+          "password": "Mot de passe",
+          "code": "Code challenge"
+        }
+      },
+      "user_login": {
+        "description": "Saissiez le mot de passe utilisateur de la centrale",
+        "data": {
+          "password": "Mot de passe",
+          "code": "Code"
+        }
+      },
       "config": {
         "description": "Choisissez d'autres modes optionnels d'armement en plus de 'Armer en absence (Zones A+B+C)'",
         "data": {
           "night_zones": "Zone(s) Nuit",
           "home_zones": "Zone(s) en présence",
           "arm_code": "Code d'armement à 4 chiffres optionnel",
-          "scan_interval": "Interval de rafraîchissement (secondes)"
+          "scan_interval": "Intervalle de rafraîchissement (secondes)"
         }
       }
     },
@@ -40,7 +55,7 @@
           "night_zones": "Zone(s) Nuit",
           "home_zones": "Zone(s) en présence",
           "arm_code": "Code d'armement à 4 chiffres optionnel",
-          "scan_interval": "Interval de rafraîchissement (secondes)"
+          "scan_interval": "Intervalle de rafraîchissement (secondes)"
         }
       }
     },
@@ -59,6 +74,112 @@
         "3": "A + B",
         "6": "B + C",
         "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "Opérateur GSM",
+        "state": {
+          "orange": "Orange",
+          "orange f": "Orange",
+          "sfr": "SFR",
+          "bouygues": "Bouygues Telecom",
+          "bouygues telecom": "Bouygues Telecom",
+          "free": "Free Mobile",
+          "free mobile": "Free Mobile",
+          "-": "Non disponible"
+        }
+      },
+      "recgsm": {
+        "name": "Signal GSM (/5)"
+      },
+      "last_sync": {
+        "name": "Dernière synchronisation"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarme"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Réinitialiser défaut piles"
+      },
+      "reset_alarm_err": {
+        "name": "Réinitialiser défaut alarme"
+      },
+      "reset_link_err": {
+        "name": "Réinitialiser défaut liaison radio"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Batterie",
+        "state": {
+          "on": "Vérifier la liste des éléments",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Mouvement",
+        "state": {
+          "on": "Détecté",
+          "off": "Non détecté"
+        }
+      },
+      "door": {
+        "name": "Portes ou fenêtres",
+        "state": {
+          "on": "Ouvertes",
+          "off": "Fermées"
+        }
+      },
+      "box": {
+        "name": "Autoprotection",
+        "state": {
+          "on": "Boîtier ouvert",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Comm Centrale <-> Capteurs",
+        "state": {
+          "on": "OK",
+          "off": "Vérifier la liste des éléments"
+        }
+      },
+      "gsm": {
+        "name": "Communication GSM",
+        "state": {
+          "on": "OK",
+          "off": "Pas de réseau"
+        }
+      },
+      "camera": {
+        "name": "Caméra",
+        "state": {
+          "on": "Connectée",
+          "off": "Déconnectée"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Problème",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Volets"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lumières"
       }
     }
   }

@@ -2,7 +2,7 @@ from .abstract_api import AbstractApi
 from .const import Page, Selector, Zone
 
 
-class ProtexiomApi(AbstractApi):
+class ProtexiomAltApi(AbstractApi):
     def __init__(self) -> None:
         self.pages = {
             Page.LOGIN: "/login.htm",
@@ -11,18 +11,33 @@ class ProtexiomApi(AbstractApi):
             Page.STATUS: "/status.xml",
             Page.ERROR: "/error.htm",
             Page.ELEMENTS: "/u_plistelmt.htm",
-            Page.CHALLENGE_CARD: "/u_print.htm",
+            Page.CHALLENGE_CARD: "/a_print.htm",
             Page.VERSION: None,
             Page.DEFAULT: "/default.htm",
         }
         self.selectors = {
             Selector.CONTENT_TYPE: "meta[http-equiv='content-type']",
-            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1) b",
+            Selector.LOGIN_CHALLENGE: "#form_id table tr:nth-child(4) td:nth-child(1)",
             Selector.ERROR_CODE: "#infobox b",
             Selector.FOOTER: "[id^='menu_footer']",
             Selector.CHALLENGE_CARD: "td:not([class])",
         }
         self.encoding = "iso-8859-15"
+
+    def requires_admin(self) -> bool:
+        return True
+
+    def is_page_authenticated(self, page) -> bool:
+        """
+        Protexiom/Protexial variants:
+        - old firmware accepts status.xml directly after login
+        - newer firmware uses authenticated page list
+        """
+
+        if page == Page.STATUS:
+            return True
+
+        return super().is_page_authenticated(page)
 
     def get_login_payload(self, username, password, code):
         return {

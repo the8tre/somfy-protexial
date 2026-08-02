@@ -1,0 +1,176 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Geben Sie die lokale Weboberflächen-URL Ihrer Protexial-Zentrale ein",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "Nur eine Instanz erlaubt"
+        }
+      },
+      "login": {
+        "description": "Geben Sie den Code für die Challenge {challenge} ein",
+        "data": {
+          "username": "Benutzername",
+          "password": "Passwort",
+          "code": "Code"
+        }
+      },
+      "admin_login": {
+        "description": "Geben Sie den Code für die Challenge {challenge} ein",
+        "data": {
+          "password": "Passwort",
+          "code": "Challenge-Code"
+        }
+      },
+      "user_login": {
+        "description": "Geben Sie das Passwort des Benutzerkontos der Alarmzentrale ein",
+        "data": {
+          "password": "Passwort",
+          "code": "Code"
+        }
+      },
+      "config": {
+        "description": "Wählen Sie zusätzliche optionale Scharfstellungsmodi neben 'Abwesend scharf (Zonen A+B+C)'",
+        "data": {
+          "night_zones": "Nachtzone(n) scharf",
+          "home_zones": "Anwesend-Zone(n) scharf",
+          "arm_code": "Optionaler 4-stelliger Scharfschaltungscode",
+          "scan_interval": "Abfrageintervall (Sekunden)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Falscher Benutzername/Passwort/Code.",
+      "connection": "Verbindung zum Server nicht möglich.",
+      "arm_code": "Der Scharfschaltungscode muss 4 Stellen haben.",
+      "same_zones": "Die ausgewählten Zonen für Nacht- und Abwesenheitsmodus müssen unterschiedlich sein."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Wählen Sie zusätzliche optionale Scharfstellungsmodi neben 'Abwesend scharf (Zonen A+B+C)'",
+        "data": {
+          "night_zones": "Nachtzone(n) scharf",
+          "home_zones": "Anwesend-Zone(n) scharf",
+          "arm_code": "Optionaler 4-stelliger Scharfschaltungscode",
+          "scan_interval": "Abfrageintervall (Sekunden)"
+        }
+      }
+    },
+    "error": {
+      "arm_code": "Der Scharfschaltungscode muss 4 Stellen haben.",
+      "same_zones": "Die ausgewählten Zonen für Nacht- und Abwesenheitsmodus müssen unterschiedlich sein."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Scharfschaltungsmodus deaktiviert",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "GSM-Anbieter"
+      },
+      "recgsm": {
+        "name": "GSM-Signal (/5)"
+      },
+      "last_sync": {
+        "name": "Letzte Synchronisierung"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarm"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Batteriefehler zurücksetzen"
+      },
+      "reset_alarm_err": {
+        "name": "Alarmfehler zurücksetzen"
+      },
+      "reset_link_err": {
+        "name": "Funkverbindungsfehler zurücksetzen"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Batterie",
+        "state": {
+          "on": "Elementliste prüfen",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Bewegung",
+        "state": {
+          "on": "Erkannt",
+          "off": "Nicht erkannt"
+        }
+      },
+      "door": {
+        "name": "Türen oder Fenster",
+        "state": {
+          "on": "Geöffnet",
+          "off": "Geschlossen"
+        }
+      },
+      "box": {
+        "name": "Sabotageschutz",
+        "state": {
+          "on": "Gehäuse geöffnet",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Kommunikation Zentrale <-> Sensoren",
+        "state": {
+          "on": "OK",
+          "off": "Elementliste prüfen"
+        }
+      },
+      "gsm": {
+        "name": "GSM-Kommunikation",
+        "state": {
+          "on": "OK",
+          "off": "Kein Netz"
+        }
+      },
+      "camera": {
+        "name": "Kamera",
+        "state": {
+          "on": "Verbunden",
+          "off": "Getrennt"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Störung",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Rollläden"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lichter"
+      }
+    }
+  }
+}

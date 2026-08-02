@@ -1,0 +1,176 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Introduce la URL de la interfaz web local de tu central Protexial",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "Solo se permite una instancia"
+        }
+      },
+      "login": {
+        "description": "Introduce el código para el desafío {challenge}",
+        "data": {
+          "username": "Nombre de usuario",
+          "password": "Contraseña",
+          "code": "Código"
+        }
+      },
+      "admin_login": {
+        "description": "Introduce el código para el desafío {challenge}",
+        "data": {
+          "password": "Contraseña",
+          "code": "Código del desafío"
+        }
+      },
+      "user_login": {
+        "description": "Introduzca la contraseña de la cuenta de usuario de la central",
+        "data": {
+          "password": "Contraseña",
+          "code": "Código"
+        }
+      },
+      "config": {
+        "description": "Elige otros modos de armado opcionales además de «Armado ausente (Zonas A+B+C)»",
+        "data": {
+          "night_zones": "Armar zona(s) nocturna(s)",
+          "home_zones": "Armar zona(s) en casa",
+          "arm_code": "Código de armado opcional de 4 dígitos",
+          "scan_interval": "Intervalo de consulta (segundos)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Nombre de usuario, contraseña o código incorrectos.",
+      "connection": "No se puede conectar con el servidor.",
+      "arm_code": "El código de armado debe tener 4 dígitos.",
+      "same_zones": "Las zonas seleccionadas para los modos nocturno y ausente deben ser diferentes."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Elige otros modos de armado opcionales además de «Armado ausente (Zonas A+B+C)»",
+        "data": {
+          "night_zones": "Armar zona(s) nocturna(s)",
+          "home_zones": "Armar zona(s) en casa",
+          "arm_code": "Código de armado opcional de 4 dígitos",
+          "scan_interval": "Intervalo de consulta (segundos)"
+        }
+      }
+    },
+    "error": {
+      "arm_code": "El código de armado debe tener 4 dígitos.",
+      "same_zones": "Las zonas seleccionadas para los modos nocturno y ausente deben ser diferentes."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Modo de armado desactivado",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "Operador GSM"
+      },
+      "recgsm": {
+        "name": "Señal GSM (/5)"
+      },
+      "last_sync": {
+        "name": "Última sincronización"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarma"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Restablecer fallo de baterías"
+      },
+      "reset_alarm_err": {
+        "name": "Restablecer fallo de alarma"
+      },
+      "reset_link_err": {
+        "name": "Restablecer fallo del enlace de radio"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Batería",
+        "state": {
+          "on": "Comprobar la lista de elementos",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Movimiento",
+        "state": {
+          "on": "Detectado",
+          "off": "No detectado"
+        }
+      },
+      "door": {
+        "name": "Puertas o ventanas",
+        "state": {
+          "on": "Abiertas",
+          "off": "Cerradas"
+        }
+      },
+      "box": {
+        "name": "Autoprotección",
+        "state": {
+          "on": "Caja abierta",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Comunicación central <-> sensores",
+        "state": {
+          "on": "OK",
+          "off": "Comprobar la lista de elementos"
+        }
+      },
+      "gsm": {
+        "name": "Comunicación GSM",
+        "state": {
+          "on": "OK",
+          "off": "Sin red"
+        }
+      },
+      "camera": {
+        "name": "Cámara",
+        "state": {
+          "on": "Conectada",
+          "off": "Desconectada"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Problema",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Persianas"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Luces"
+      }
+    }
+  }
+}

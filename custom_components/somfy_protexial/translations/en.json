@@ -16,6 +16,20 @@
           "code": "Code"
         }
       },
+      "admin_login": {
+        "description": "Provide code for challenge {challenge}",
+        "data": {
+          "password": "Password",
+          "code": "Code challenge"
+        }
+      },
+      "user_login": {
+        "description": "Enter the password for the control panel user account",
+        "data": {
+          "password": "Password",
+          "code": "Code"
+        }
+      },
       "config": {
         "description": "Choose other optional arm modes in addition to 'Arm away (Zones A+B+C)'",
         "data": {
@@ -60,6 +74,102 @@
         "3": "A + B",
         "6": "B + C",
         "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "GSM Provider"
+      },
+      "recgsm": {
+        "name": "GSM Signal (/5)"
+      },
+      "last_sync": {
+        "name": "Last Sync"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarm"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Reset Battery Error"
+      },
+      "reset_alarm_err": {
+        "name": "Reset Alarm Error"
+      },
+      "reset_link_err": {
+        "name": "Reset Radio Link Error"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Battery",
+        "state": {
+          "on": "Check element list",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Motion",
+        "state": {
+          "on": "Detected",
+          "off": "Not detected"
+        }
+      },
+      "door": {
+        "name": "Doors or windows",
+        "state": {
+          "on": "Opened",
+          "off": "Closed"
+        }
+      },
+      "box": {
+        "name": "Selfprotection",
+        "state": {
+          "on": "Box opened",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Central <-> Sensors Communication",
+        "state": {
+          "on": "OK",
+          "off": "Check element list"
+        }
+      },
+      "gsm": {
+        "name": "GSM Communication",
+        "state": {
+          "on": "OK",
+          "off": "No network"
+        }
+      },
+      "camera": {
+        "name": "Camera",
+        "state": {
+          "on": "Connected",
+          "off": "Disconnected"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Problem",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Covers"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lights"
       }
     }
   }

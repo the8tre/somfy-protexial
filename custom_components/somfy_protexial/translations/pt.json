@@ -1,0 +1,176 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Introduza o URL da interface Web local da central Protexial",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "Apenas uma instância permitida"
+        }
+      },
+      "login": {
+        "description": "Introduza o código para o desafio {challenge}",
+        "data": {
+          "username": "Nome de utilizador",
+          "password": "Palavra-passe",
+          "code": "Código"
+        }
+      },
+      "admin_login": {
+        "description": "Introduza o código para o desafio {challenge}",
+        "data": {
+          "password": "Palavra-passe",
+          "code": "Código do desafio"
+        }
+      },
+      "user_login": {
+        "description": "Introduza a palavra-passe da conta de utilizador da central",
+        "data": {
+          "password": "Palavra-passe",
+          "code": "Código"
+        }
+      },
+      "config": {
+        "description": "Escolha outros modos de ativação opcionais além de «Ativar ausente (Zonas A+B+C)»",
+        "data": {
+          "night_zones": "Ativar zona(s) noturna(s)",
+          "home_zones": "Ativar zona(s) em casa",
+          "arm_code": "Código de ativação opcional de 4 dígitos",
+          "scan_interval": "Intervalo de consulta (segundos)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Nome de utilizador, palavra-passe ou código incorreto.",
+      "connection": "Não foi possível ligar ao servidor.",
+      "arm_code": "O código de ativação deve ter 4 dígitos.",
+      "same_zones": "As zonas selecionadas para os modos noturno e ausente devem ser diferentes."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Escolha outros modos de ativação opcionais além de «Ativar ausente (Zonas A+B+C)»",
+        "data": {
+          "night_zones": "Ativar zona(s) noturna(s)",
+          "home_zones": "Ativar zona(s) em casa",
+          "arm_code": "Código de ativação opcional de 4 dígitos",
+          "scan_interval": "Intervalo de consulta (segundos)"
+        }
+      }
+    },
+    "error": {
+      "arm_code": "O código de ativação deve ter 4 dígitos.",
+      "same_zones": "As zonas selecionadas para os modos noturno e ausente devem ser diferentes."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Modo de ativação desativado",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "Operador GSM"
+      },
+      "recgsm": {
+        "name": "Sinal GSM (/5)"
+      },
+      "last_sync": {
+        "name": "Última sincronização"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarme"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Repor erro das pilhas"
+      },
+      "reset_alarm_err": {
+        "name": "Repor erro do alarme"
+      },
+      "reset_link_err": {
+        "name": "Repor erro da ligação de rádio"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Pilha",
+        "state": {
+          "on": "Verificar a lista de elementos",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Movimento",
+        "state": {
+          "on": "Detetado",
+          "off": "Não detetado"
+        }
+      },
+      "door": {
+        "name": "Portas ou janelas",
+        "state": {
+          "on": "Abertas",
+          "off": "Fechadas"
+        }
+      },
+      "box": {
+        "name": "Autoproteção",
+        "state": {
+          "on": "Caixa aberta",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Comunicação central <-> sensores",
+        "state": {
+          "on": "OK",
+          "off": "Verificar a lista de elementos"
+        }
+      },
+      "gsm": {
+        "name": "Comunicação GSM",
+        "state": {
+          "on": "OK",
+          "off": "Sem rede"
+        }
+      },
+      "camera": {
+        "name": "Câmara",
+        "state": {
+          "on": "Ligada",
+          "off": "Desligada"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Problema",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Estores"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Luzes"
+      }
+    }
+  }
+}

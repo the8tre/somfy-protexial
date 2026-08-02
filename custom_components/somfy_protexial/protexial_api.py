@@ -66,3 +66,12 @@ class ProtexialApi(AbstractApi):
 
     def get_stop_cover_payload(self):
         return {"hidden": "hidden", "btn_vol_stop": ""}
+
+    def get_reset_battery_err_payload(self):
+        return {"btn_del_pil": "Piles"}
+
+    def get_reset_alarm_err_payload(self):
+        return {"btn_del_alm": "Alarmes"}
+
+    def get_reset_link_err_payload(self):
+        return {"btn_del_lia": "Liaisons"}

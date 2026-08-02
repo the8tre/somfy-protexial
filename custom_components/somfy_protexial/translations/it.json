@@ -1,0 +1,176 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Inserisci l’URL dell’interfaccia web locale della centrale Protexial",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "È consentita una sola istanza"
+        }
+      },
+      "login": {
+        "description": "Inserisci il codice per la sfida {challenge}",
+        "data": {
+          "username": "Nome utente",
+          "password": "Password",
+          "code": "Codice"
+        }
+      },
+      "admin_login": {
+        "description": "Inserisci il codice per la sfida {challenge}",
+        "data": {
+          "password": "Password",
+          "code": "Codice della sfida"
+        }
+      },
+      "user_login": {
+        "description": "Inserisci la password dell'account utente della centrale",
+        "data": {
+          "password": "Password",
+          "code": "Codice"
+        }
+      },
+      "config": {
+        "description": "Scegli altre modalità di inserimento opzionali oltre a «Inserimento fuori casa (Zone A+B+C)»",
+        "data": {
+          "night_zones": "Inserisci zona/e notte",
+          "home_zones": "Inserisci zona/e casa",
+          "arm_code": "Codice di inserimento opzionale di 4 cifre",
+          "scan_interval": "Intervallo di scansione (secondi)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Nome utente, password o codice errati.",
+      "connection": "Impossibile connettersi al server.",
+      "arm_code": "Il codice di inserimento deve essere di 4 cifre.",
+      "same_zones": "Le zone selezionate per le modalità notte e fuori casa devono essere diverse."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Scegli altre modalità di inserimento opzionali oltre a «Inserimento fuori casa (Zone A+B+C)»",
+        "data": {
+          "night_zones": "Inserisci zona/e notte",
+          "home_zones": "Inserisci zona/e casa",
+          "arm_code": "Codice di inserimento opzionale di 4 cifre",
+          "scan_interval": "Intervallo di scansione (secondi)"
+        }
+      }
+    },
+    "error": {
+      "arm_code": "Il codice di inserimento deve essere di 4 cifre.",
+      "same_zones": "Le zone selezionate per le modalità notte e fuori casa devono essere diverse."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Modalità di inserimento disattivata",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "Operatore GSM"
+      },
+      "recgsm": {
+        "name": "Segnale GSM (/5)"
+      },
+      "last_sync": {
+        "name": "Ultima sincronizzazione"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Allarme"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Reimposta errore batterie"
+      },
+      "reset_alarm_err": {
+        "name": "Reimposta errore allarme"
+      },
+      "reset_link_err": {
+        "name": "Reimposta errore collegamento radio"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Batteria",
+        "state": {
+          "on": "Controlla l’elenco degli elementi",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Movimento",
+        "state": {
+          "on": "Rilevato",
+          "off": "Non rilevato"
+        }
+      },
+      "door": {
+        "name": "Porte o finestre",
+        "state": {
+          "on": "Aperte",
+          "off": "Chiuse"
+        }
+      },
+      "box": {
+        "name": "Autoprotezione",
+        "state": {
+          "on": "Centrale aperta",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Comunicazione centrale <-> sensori",
+        "state": {
+          "on": "OK",
+          "off": "Controlla l’elenco degli elementi"
+        }
+      },
+      "gsm": {
+        "name": "Comunicazione GSM",
+        "state": {
+          "on": "OK",
+          "off": "Nessuna rete"
+        }
+      },
+      "camera": {
+        "name": "Telecamera",
+        "state": {
+          "on": "Connessa",
+          "off": "Disconnessa"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Problema",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Tapparelle"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Luci"
+      }
+    }
+  }
+}

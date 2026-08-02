@@ -1,0 +1,144 @@
+type: vertical-stack
+cards:
+  - type: custom:mushroom-template-card
+    primary: "{{ state_attr(entity, 'friendly_name') }}"
+    secondary: "Zone : {{ state_attr(entity, 'Zone') }}"
+    icon: |-
+      {% if is_state(entity, 'off') %} mdi:door-closed
+      {% elif is_state(entity, 'on') %} mdi:door-open
+      {% else %} mdi:alert
+      {% endif %}
+    entity: binary_sensor.do_ouverture
+    multiline_secondary: true
+    grid_options:
+      columns: full
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    tap_action:
+      action: more-info
+    color: |-
+      {% if is_state(entity, 'off') %} green
+      {% elif is_state(entity, 'on') %} red
+      {% else %} yellow
+      {% endif %}
+    features_position: bottom
+    icon_tap_action:
+      action: more-info
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'Battery') %}
+          {% if v == 'ok' %} mdi:battery
+          {% elif v == 'low' %} mdi:battery-low
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'Battery') %}
+          {% if v == 'ok' %} grey
+          {% elif v == 'low' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'Link') %}
+          {% if v == 'connected' %} mdi:access-point
+          {% elif v == 'disconnected' %} mdi:access-point-off
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'Link') %}
+          {% if v == 'connected' %} grey
+          {% elif v == 'disconnected' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'House') %}
+          {% if v == 'ok' %} mdi:alert-octagram-outline
+          {% elif v == 'domestic fault/intrusion' %} mdi:alert-octagram
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'House') %}
+          {% if v == 'ok' %} grey
+          {% elif v == 'domestic fault/intrusion' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'Tamper') %}
+          {% if v == 'ok' %} mdi:lock-open-check
+          {% elif v == 'open/ripped off' %} mdi:lock-open-variant
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'Tamper') %}
+          {% if v == 'ok' %} grey
+          {% elif v == 'open/ripped off' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'Door open') %}
+          {% if v == 'closed' %} mdi:door-closed
+          {% elif v == 'open' %} mdi:door-open
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'Door open') %}
+          {% if v == 'closed' %} grey
+          {% elif v == 'open' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info
+      - type: custom:mushroom-template-card
+        icon: |-
+          {% set v = state_attr(entity, 'Running') %}
+          {% if v == 'running' %} mdi:play-circle
+          {% elif v == 'paused' %} mdi:pause-circle
+          {% else %} mdi:alert
+          {% endif %}
+        entity: binary_sensor.do_ouvture
+        grid_options:
+          columns: 4
+        color: |-
+          {% set v = state_attr(entity, 'Running') %}
+          {% if v == 'running' %} grey
+          {% elif v == 'paused' %} red
+          {% else %} yellow
+          {% endif %}
+        features_position: bottom
+        icon_tap_action:
+          action: more-info

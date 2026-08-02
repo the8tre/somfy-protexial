@@ -8,8 +8,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import API, DEVICE_INFO, DOMAIN
 from .protexial import SomfyProtexial
 
-DEFAULT_LIGHT_NAME = "Lumières"
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -26,6 +24,12 @@ async def async_setup_entry(
 
 
 class ProtexialLight(LightEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "light"
+    _attr_icon = "mdi:lightbulb-group"
+    _attr_supported_color_modes = {ColorMode.ONOFF}
+    _attr_color_mode = ColorMode.ONOFF
+
     def __init__(self, device_info, api: SomfyProtexial) -> None:
         super().__init__()
         self.api = api
@@ -34,25 +38,11 @@ class ProtexialLight(LightEntity):
         self._changed_by = None
         self._state = False
 
-    @property
-    def name(self):
-        return DEFAULT_LIGHT_NAME
-
-    @property
-    def icon(self):
-        return "mdi:lightbulb-group"
 
     @property
     def is_on(self):
         return self._state
 
-    @property
-    def supported_color_modes(self):
-        return {ColorMode.ONOFF}
-
-    @property
-    def color_mode(self):
-        return ColorMode.ONOFF
 
     async def async_turn_on(self):
         await self.api.turn_light_on()

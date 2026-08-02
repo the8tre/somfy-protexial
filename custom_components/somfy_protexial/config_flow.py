@@ -55,6 +55,8 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.code = None
         self.username = None
         self.password = None
+        self.codes = None
+        self.version = None
 
     async def async_step_user(self, user_input):
         if self._async_current_entries():
@@ -69,6 +71,8 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 self.api_type = await self.protexial.guess_and_set_api_type()
                 challenge = await self.protexial.get_challenge()
+                if self.protexial.api.requires_admin():
+                    return await self.async_step_admin_login(None, challenge)
                 return await self.async_step_login(None, challenge)
             except Exception as e:
                 _LOGGER.exception(e)
@@ -77,6 +81,70 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({vol.Required(CONF_URL): cv.string}),
+            errors=errors,
+        )
+
+    async def async_step_admin_login(self, user_input, challenge=None):
+        errors = {}
+        if user_input is not None:
+            self.code = user_input[CONF_CODE]
+            self.username = "a"
+            self.password = user_input[CONF_PASSWORD]
+
+            try:
+                self.codes = await self.protexial.get_challenge_card(
+                    self.username, self.password, self.code
+                )
+                self.version = await self.protexial.get_version()
+                await self.protexial.logout()
+
+                return await self.async_step_user_login(None)
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "auth"
+
+        if challenge is None:
+            challenge = await self.protexial.get_challenge()
+
+        return self.async_show_form(
+            step_id="admin_login",
+            description_placeholders={"challenge": challenge},
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): cv.string,
+                    vol.Required(CONF_CODE): TextSelector(
+                        TextSelectorConfig(type=TextSelectorType.PASSWORD)
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_user_login(self, user_input, challenge=None):
+        errors = {}
+        if user_input is not None:
+            self.username = "u"
+            self.password = user_input[CONF_PASSWORD]
+
+            try:
+                self.protexial.set_credentials(self.username, self.password, self.codes)
+                self.protexial.init()
+                return await self.async_step_config(None)
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "auth"
+
+            if challenge is None:
+                challenge = await self.protexial.get_challenge()
+
+        return self.async_show_form(
+            step_id="user_login",
+            description_placeholders={"challenge": challenge},
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): cv.string,
+                }
+            ),
             errors=errors,
         )
 
@@ -196,9 +264,11 @@ class ProtexialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options flow."""
+
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize Protexial options flow."""
-        self.config_entry = config_entry
+        """Store config entry for options flow."""
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -220,24 +290,24 @@ class ProtexialOptionsFlowHandler(config_entries.OptionsFlow):
                 night_zones = int(user_input[CONF_NIGHT_ZONES])
                 home_zones = int(user_input[CONF_HOME_ZONES])
                 newData = {
-                    CONF_URL: self.config_entry.data[CONF_URL],
-                    CONF_API_TYPE: self.config_entry.data[CONF_API_TYPE],
-                    CONF_USERNAME: self.config_entry.data[CONF_USERNAME],
-                    CONF_PASSWORD: self.config_entry.data[CONF_PASSWORD],
-                    CONF_CODES: self.config_entry.data[CONF_CODES],
+                    CONF_URL: self._config_entry.data[CONF_URL],
+                    CONF_API_TYPE: self._config_entry.data[CONF_API_TYPE],
+                    CONF_USERNAME: self._config_entry.data[CONF_USERNAME],
+                    CONF_PASSWORD: self._config_entry.data[CONF_PASSWORD],
+                    CONF_CODES: self._config_entry.data[CONF_CODES],
                     CONF_NIGHT_ZONES: night_zones,
                     CONF_HOME_ZONES: home_zones,
                     CONF_ARM_CODE: arm_code,
                     CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
-                    ATTR_SW_VERSION: self.config_entry.data[ATTR_SW_VERSION],
+                    ATTR_SW_VERSION: self._config_entry.data[ATTR_SW_VERSION],
                 }
                 self.hass.config_entries.async_update_entry(
-                    self.config_entry, data=newData, options=self.config_entry.options
+                    self._config_entry, data=newData, options=self._config_entry.options
                 )
                 return self.async_create_entry(title="", data={})
 
-        current_night_zones = str(self.config_entry.data[CONF_NIGHT_ZONES])
-        current_home_zones = str(self.config_entry.data[CONF_HOME_ZONES])
+        current_night_zones = str(self._config_entry.data[CONF_NIGHT_ZONES])
+        current_home_zones = str(self._config_entry.data[CONF_HOME_ZONES])
 
         return self.async_show_form(
             step_id="init",

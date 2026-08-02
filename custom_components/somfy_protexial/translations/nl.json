@@ -1,0 +1,176 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Voer de URL van de lokale webinterface van uw Protexial-centrale in",
+        "data": {
+          "url": "URL",
+          "single_instance_allowed": "Slechts één instantie toegestaan"
+        }
+      },
+      "login": {
+        "description": "Voer de code in voor uitdaging {challenge}",
+        "data": {
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "code": "Code"
+        }
+      },
+      "admin_login": {
+        "description": "Voer de code in voor uitdaging {challenge}",
+        "data": {
+          "password": "Wachtwoord",
+          "code": "Uitdagingscode"
+        }
+      },
+      "user_login": {
+        "description": "Voer het wachtwoord van het gebruikersaccount van de alarmcentrale in",
+        "data": {
+          "password": "Wachtwoord",
+          "code": "Code"
+        }
+      },
+      "config": {
+        "description": "Kies andere optionele inschakelmodi naast ‘Afwezig inschakelen (zones A+B+C)’",
+        "data": {
+          "night_zones": "Nachtzone(s) inschakelen",
+          "home_zones": "Thuiszone(s) inschakelen",
+          "arm_code": "Optionele 4-cijferige inschakelcode",
+          "scan_interval": "Scaninterval (seconden)"
+        }
+      }
+    },
+    "error": {
+      "auth": "Onjuiste gebruikersnaam, wachtwoord of code.",
+      "connection": "Kan geen verbinding maken met de server.",
+      "arm_code": "De inschakelcode moet uit 4 cijfers bestaan.",
+      "same_zones": "De geselecteerde zones voor nacht- en afwezigheidsmodus moeten verschillend zijn."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Kies andere optionele inschakelmodi naast ‘Afwezig inschakelen (zones A+B+C)’",
+        "data": {
+          "night_zones": "Nachtzone(s) inschakelen",
+          "home_zones": "Thuiszone(s) inschakelen",
+          "arm_code": "Optionele 4-cijferige inschakelcode",
+          "scan_interval": "Scaninterval (seconden)"
+        }
+      }
+    },
+    "error": {
+      "arm_code": "De inschakelcode moet uit 4 cijfers bestaan.",
+      "same_zones": "De geselecteerde zones voor nacht- en afwezigheidsmodus moeten verschillend zijn."
+    }
+  },
+  "selector": {
+    "zones": {
+      "options": {
+        "0": "Inschakelmodus uitgeschakeld",
+        "1": "A",
+        "2": "B",
+        "4": "C",
+        "3": "A + B",
+        "6": "B + C",
+        "5": "A + C"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "opegsm": {
+        "name": "GSM-provider"
+      },
+      "recgsm": {
+        "name": "GSM-signaal (/5)"
+      },
+      "last_sync": {
+        "name": "Laatste synchronisatie"
+      }
+    },
+    "alarm_control_panel": {
+      "alarm": {
+        "name": "Alarm"
+      }
+    },
+    "button": {
+      "reset_battery_err": {
+        "name": "Batterijfout resetten"
+      },
+      "reset_alarm_err": {
+        "name": "Alarmfout resetten"
+      },
+      "reset_link_err": {
+        "name": "Radioverbindingsfout resetten"
+      }
+    },
+    "binary_sensor": {
+      "battery": {
+        "name": "Batterij",
+        "state": {
+          "on": "Controleer de elementenlijst",
+          "off": "OK"
+        }
+      },
+      "alarm": {
+        "name": "Beweging",
+        "state": {
+          "on": "Gedetecteerd",
+          "off": "Niet gedetecteerd"
+        }
+      },
+      "door": {
+        "name": "Deuren of ramen",
+        "state": {
+          "on": "Geopend",
+          "off": "Gesloten"
+        }
+      },
+      "box": {
+        "name": "Sabotagebeveiliging",
+        "state": {
+          "on": "Behuizing geopend",
+          "off": "OK"
+        }
+      },
+      "radio": {
+        "name": "Communicatie centrale <-> sensoren",
+        "state": {
+          "on": "OK",
+          "off": "Controleer de elementenlijst"
+        }
+      },
+      "gsm": {
+        "name": "GSM-communicatie",
+        "state": {
+          "on": "OK",
+          "off": "Geen netwerk"
+        }
+      },
+      "camera": {
+        "name": "Camera",
+        "state": {
+          "on": "Verbonden",
+          "off": "Niet verbonden"
+        }
+      },
+      "element_aggregate": {
+        "state": {
+          "on": "Probleem",
+          "off": "OK"
+        }
+      }
+    },
+    "cover": {
+      "cover": {
+        "name": "Rolluiken"
+      }
+    },
+    "light": {
+      "light": {
+        "name": "Lichten"
+      }
+    }
+  }
+}
