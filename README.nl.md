@@ -14,7 +14,9 @@
 
 ## Over
 
-🔀 Deze versie 2.0.x is een **bijgewerkte fork** van de oorspronkelijke integratie van [the8tre](https://github.com/the8tre), beschikbaar [hier](https://github.com/the8tre/somfy-protexial).
+🔀 Deze versie 2.0.x bevat alle updates van de [fork](https://github.com/the8tre/somfy-protexial) **onderhouden door AuroreVgn**, gebaseerd op de oorspronkelijke integratie van [the8tre](https://github.com/the8tre).
+
+**Dit is de laatste update die in deze repository wordt gepubliceerd. Gebruik vanaf nu [deze repository](https://github.com/AuroreVgn/somfy-protexial).**
 
 De belangrijkste doelstellingen van deze integratie zijn:
 
