@@ -13,7 +13,9 @@
 
 ## À propos
 
-🔀 Cette version 2.0.x est un [Fork](https://github.com/the8tre/somfy-protexial) **mis à jour** de l’intégration originale de [the8tre](https://github.com/the8tre).
+🔀 Cette version 2.0.x reprend toutes les mises à jour du [Fork](https://github.com/the8tre/somfy-protexial) **mis à jour par AuroreVgn** basé sur l’intégration originale de [the8tre](https://github.com/the8tre).
+
+**Cette mise à jour sera la dernière de ce dépôt, merci d'utiliser [celui-ci](https://github.com/AuroreVgn/somfy-protexial).**
 
 Les principaux objectifs de cette intégration sont d'anticiper : 
 - l'**arrêt de la 2G** en proposant une alternative fiable sans devoir tout changer pour alerter d'une intrusion (ou autre) directement via Home Assistant et l'application smartphone permettant la mise en place d'alertes critiques (ie. qui notifient même en silencieux).
