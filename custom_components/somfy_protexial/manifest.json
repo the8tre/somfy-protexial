@@ -17,5 +17,5 @@
     "pyquery==2.0.0",
     "cssselect<1.5"
   ],
-  "version": "2.0.11"
+  "version": "2.0.11-LAST-MAINTAINED-USE-AuroreVgnRepoInstead"
 }
